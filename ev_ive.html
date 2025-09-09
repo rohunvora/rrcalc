@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>EV Check</title>
+  <style>
+    :root {
+      --black: #000000;
+      --white: #ffffff;
+      --gray-900: #0a0a0a;
+      --gray-800: #1a1a1a;
+      --gray-700: #2a2a2a;
+      --gray-600: #404040;
+      --gray-500: #737373;
+      --gray-400: #a3a3a3;
+      --gray-300: #d4d4d4;
+      --gray-200: #e5e5e5;
+      --gray-100: #f5f5f5;
+      --green: #00c851;
+      --red: #ff3b30;
+      --amber: #ffab00;
+      --safe-area-inset-top: env(safe-area-inset-top);
+      --safe-area-inset-bottom: env(safe-area-inset-bottom);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    html {
+      background: var(--black);
+      color: var(--white);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-size: 17px;
+      line-height: 1.47059;
+      font-weight: 400;
+      letter-spacing: -0.022em;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--black);
+      padding-top: var(--safe-area-inset-top);
+      padding-bottom: var(--safe-area-inset-bottom);
+    }
+
+    .container {
+      width: 100%;
+      max-width: 428px;
+      margin: 0 auto;
+      padding: 24px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 34px;
+      line-height: 1.20588;
+      font-weight: 700;
+      letter-spacing: 0.008em;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 15px;
+      line-height: 1.33333;
+      color: var(--gray-400);
+      letter-spacing: -0.01em;
+    }
+
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .input-full {
+      grid-column: 1 / -1;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+    
+    .input-preview {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--gray-600);
+      pointer-events: none;
+      font-variant-numeric: tabular-nums;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    .input-wrapper:focus-within .input-preview {
+      opacity: 1;
+    }
+
+    .input-label {
+      font-size: 13px;
+      line-height: 1.38462;
+      letter-spacing: -0.008em;
+      color: var(--gray-500);
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .input-hint {
+      font-size: 11px;
+      color: var(--gray-600);
+      margin-left: 2px;
+      opacity: 0.8;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 54px;
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 17px;
+      color: var(--white);
+      font-weight: 400;
+      outline: none;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      -webkit-appearance: none;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .input-field:focus {
+      background: var(--gray-800);
+      border-color: var(--gray-600);
+      transform: scale(1.02);
+    }
+
+    .input-field::placeholder {
+      color: var(--gray-600);
+    }
+
+    .input-suffix {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray-500);
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    .confidence-section {
+      margin: 32px 0;
+      padding: 24px 0;
+      border-top: 1px solid var(--gray-900);
+      border-bottom: 1px solid var(--gray-900);
+    }
+
+    .confidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+    }
+
+    .confidence-title {
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .confidence-value {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.009em;
+      font-variant-numeric: tabular-nums;
+      transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slider-container {
+      position: relative;
+      padding: 20px 0;
+    }
+
+    .slider {
+      width: 100%;
+      height: 44px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-track {
+      width: 100%;
+      height: 6px;
+      background: var(--gray-800);
+      border-radius: 3px;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      background: var(--white);
+      border-radius: 50%;
+      cursor: grab;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
+      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .slider::-webkit-slider-thumb:active {
+      cursor: grabbing;
+      transform: scale(1.15);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--gray-500);
+    }
+
+    .preset-note {
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-600);
+      margin-top: 12px;
+      font-style: italic;
+    }
+
+    .results {
+      background: var(--gray-900);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .result-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .result-row:not(:last-child) {
+      border-bottom: 1px solid var(--gray-800);
+    }
+
+    .result-label {
+      font-size: 15px;
+      color: var(--gray-400);
+      letter-spacing: -0.01em;
+    }
+
+    .result-value {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 0.008em;
+      font-variant-numeric: tabular-nums;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .result-value.positive {
+      color: var(--green);
+    }
+
+    .result-value.negative {
+      color: var(--red);
+    }
+
+    .break-even {
+      background: var(--gray-800);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .break-even-label {
+      font-size: 13px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+    }
+
+    .break-even-value {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--gray-300);
+    }
+
+    .verdict {
+      background: var(--gray-900);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      margin-top: auto;
+      margin-bottom: 24px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid var(--gray-900);
+      transform: scale(1);
+    }
+
+    .verdict.positive {
+      background: linear-gradient(135deg, rgba(0,200,81,0.1), rgba(0,200,81,0.05));
+      border-color: rgba(0,200,81,0.3);
+      animation: pulsePositive 2s ease-in-out infinite;
+    }
+
+    .verdict.negative {
+      background: linear-gradient(135deg, rgba(255,59,48,0.1), rgba(255,59,48,0.05));
+      border-color: rgba(255,59,48,0.3);
+    }
+
+    @keyframes pulsePositive {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .ev-amount {
+      font-size: 42px;
+      font-weight: 700;
+      letter-spacing: 0.009em;
+      margin-bottom: 8px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      font-variant-numeric: tabular-nums;
+      will-change: transform;
+    }
+
+    .ev-label {
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.022em;
+      opacity: 0.8;
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      height: 50px;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.022em;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+
+    .btn:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-primary {
+      background: var(--white);
+      color: var(--black);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: var(--gray-800);
+      color: var(--gray-300);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.97);
+    }
+
+    .history {
+      position: fixed;
+      bottom: calc(20px + var(--safe-area-inset-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 11px;
+      color: var(--gray-600);
+      text-align: center;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      opacity: 0;
+      transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .history.visible {
+      opacity: 1;
+    }
+
+    /* Haptic-like visual feedback */
+    @keyframes microBounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.005); }
+    }
+
+    .input-field:focus {
+      animation: microBounce 0.3s ease;
+    }
+
+    @media (prefers-color-scheme: light) {
+      /* Keep dark theme always */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>EV Check</h1>
+      <p>Expected value calculator</p>
+    </div>
+
+    <div class="input-group">
+      <div class="input-row">
+        <div class="input-wrapper">
+          <label class="input-label" for="entry">Entry Market Cap <span class="input-hint">(2M, 500K, etc)</span></label>
+          <input 
+            type="text" 
+            id="entry" 
+            class="input-field" 
+            placeholder="2M"
+            inputmode="decimal"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <span class="input-preview" id="entry-preview"></span>
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label" for="target">Target Market Cap <span class="input-hint">(10M, 5.5M, etc)</span></label>
+          <input 
+            type="text" 
+            id="target" 
+            class="input-field" 
+            placeholder="10M"
+            inputmode="decimal"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+          />
+          <span class="input-preview" id="target-preview"></span>
+        </div>
+      </div>
+      <div class="input-row" style="margin-top: 8px;">
+        <div class="input-wrapper input-full">
+          <div class="multiplier-chips" style="display: flex; gap: 8px; justify-content: center;">
+            <button class="chip" data-multiplier="2">×2</button>
+            <button class="chip" data-multiplier="5">×5</button>
+            <button class="chip" data-multiplier="10">×10</button>
+            <button class="chip" data-multiplier="50">×50</button>
+          </div>
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-wrapper">
+          <label class="input-label" for="position">Position Size <span class="input-hint">(SOL)</span></label>
+          <input 
+            type="number" 
+            id="position" 
+            class="input-field" 
+            placeholder="20"
+            inputmode="decimal"
+            step="any"
+          />
+        </div>
+        <div class="input-wrapper">
+          <label class="input-label" for="maxLoss">Max Loss <span class="input-hint">(% of position)</span></label>
+          <input 
+            type="number" 
+            id="maxLoss" 
+            class="input-field" 
+            placeholder="25"
+            inputmode="decimal"
+            step="any"
+            min="0"
+            max="100"
+          />
+        </div>
+      </div>
+      <div class="input-row">
+        <div class="input-wrapper input-full">
+          <label class="input-label" for="slippage">Exit Slippage <span class="input-hint">(% reduction on profit, optional)</span></label>
+          <input 
+            type="number" 
+            id="slippage" 
+            class="input-field" 
+            placeholder="0"
+            inputmode="decimal"
+            step="any"
+            min="0"
+            max="50"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="confidence-section">
+      <div class="confidence-header">
+        <span class="confidence-title">Your confidence</span>
+        <span class="confidence-value" id="confidence-display">20%</span>
+      </div>
+      <div class="slider-container">
+        <input 
+          type="range" 
+          id="confidence" 
+          class="slider" 
+          min="5" 
+          max="50" 
+          value="20"
+          step="1"
+        />
+        <div class="slider-labels">
+          <span>😰 5%</span>
+          <span>25%</span>
+          <span>50% 🚀</span>
+        </div>
+      </div>
+      <div class="preset-note">
+        <span>Typical shitcoin: 10-20%</span>
+        <button class="btn-text" id="setBreakeven" style="margin-left: 12px; font-size: 12px; color: var(--gray-400); text-decoration: underline; background: none; border: none; cursor: pointer; padding: 0;">Set to breakeven</button>
+      </div>
+    </div>
+
+    <div class="results">
+      <div class="result-row">
+        <span class="result-label">Upside if correct</span>
+        <span class="result-value positive" id="upside">+0 SOL</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">Downside if wrong</span>
+        <span class="result-value negative" id="downside">-0 SOL</span>
+      </div>
+      <div class="break-even">
+        <div class="break-even-label">Break-even probability</div>
+        <div class="break-even-value" id="breakeven">0%</div>
+      </div>
+    </div>
+
+    <div class="verdict" id="verdict">
+      <div class="ev-amount" id="ev-amount">0 SOL</div>
+      <div class="ev-label" id="ev-label">Enter values above</div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn btn-secondary" id="skip">Skip</button>
+      <button class="btn btn-primary" id="trade">Take Trade</button>
+    </div>
+
+    <div class="history" id="history">
+      <span id="history-text"></span>
+    </div>
+  </div>
+
+  <script>
+    // Get elements
+    const $ = id => document.getElementById(id);
+    const entry = $('entry');
+    const target = $('target');
+    const position = $('position');
+    const maxLoss = $('maxLoss');
+    const slippage = $('slippage');
+    const confidence = $('confidence');
+    const confidenceDisplay = $('confidence-display');
+    const upside = $('upside');
+    const downside = $('downside');
+    const breakeven = $('breakeven');
+    const verdict = $('verdict');
+    const evAmount = $('ev-amount');
+    const evLabel = $('ev-label');
+    const skipBtn = $('skip');
+    const tradeBtn = $('trade');
+    const setBreakevenBtn = $('setBreakeven');
+    const history = $('history');
+    const historyText = $('history-text');
+
+    // Parse numbers with K, M, B suffixes
+    function parseShorthand(value) {
+      if (!value) return 0;
+      
+      // Remove commas
+      value = value.toString().replace(/,/g, '');
+      
+      // Check for suffixes
+      const upperValue = value.toUpperCase();
+      if (upperValue.endsWith('K')) {
+        return parseFloat(value) * 1000;
+      } else if (upperValue.endsWith('M')) {
+        return parseFloat(value) * 1000000;
+      } else if (upperValue.endsWith('B')) {
+        return parseFloat(value) * 1000000000;
+      }
+      
+      return parseFloat(value) || 0;
+    }
+
+    // Format large numbers with commas
+    function formatWithCommas(num) {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    // Format to shorthand (2.5M, 300K, etc)
+    function formatToShorthand(num) {
+      if (num >= 1000000000) {
+        return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+      } else if (num >= 1000000) {
+        return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+      } else if (num >= 1000) {
+        return (num / 1000).toFixed(0) + 'K';
+      }
+      return num.toString();
+    }
+
+    // Track trades
+    let tradeHistory = JSON.parse(localStorage.getItem('evHistory') || '[]');
+    let confidenceSum = 0;
+    let confidenceCount = 0;
+
+    // Load last values
+    function loadLastValues() {
+      const saved = localStorage.getItem('evLastValues');
+      if (saved) {
+        const values = JSON.parse(saved);
+        // Format market caps nicely
+        if (values.entryMC) {
+          entry.value = formatToShorthand(values.entryMC);
+        }
+        if (values.targetMC) {
+          target.value = formatToShorthand(values.targetMC);
+        }
+        position.value = values.position || '';
+        maxLoss.value = values.maxLoss || 25;
+        slippage.value = values.slippage || 0;
+        confidence.value = values.confidence || 20;
+        confidenceDisplay.textContent = confidence.value + '%';
+      }
+    }
+
+    // Save current values
+    function saveValues() {
+      const values = {
+        entryMC: parseShorthand(entry.value),
+        targetMC: parseShorthand(target.value),
+        position: position.value,
+        maxLoss: maxLoss.value,
+        slippage: slippage.value,
+        confidence: confidence.value
+      };
+      localStorage.setItem('evLastValues', JSON.stringify(values));
+    }
+
+    // Format numbers with proper spacing
+    function formatSOL(value) {
+      const abs = Math.abs(value);
+      if (abs >= 1000) {
+        return value.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      } else if (abs >= 100) {
+        return value.toFixed(0);
+      } else if (abs >= 10) {
+        return value.toFixed(1);
+      } else {
+        return value.toFixed(2);
+      }
+    }
+
+    // Store breakeven for the button
+    let currentBreakeven = 0;
+
+    // Calculate EV
+    function calculate() {
+      const entryMC = parseShorthand(entry.value);
+      const targetMC = parseShorthand(target.value);
+      const posSize = parseFloat(position.value) || 0;
+      const maxLossPct = parseFloat(maxLoss.value) || 25; // Default 25%
+      const slippagePct = Math.min(50, Math.max(0, parseFloat(slippage.value) || 0)) / 100;
+      const conf = parseFloat(confidence.value) / 100;
+
+      if (entryMC <= 0 || targetMC <= 0 || posSize <= 0) {
+        evAmount.textContent = '0 SOL';
+        evLabel.textContent = 'Enter values above';
+        upside.textContent = '+0 SOL';
+        downside.textContent = '-0 SOL';
+        breakeven.textContent = '0%';
+        verdict.className = 'verdict';
+        currentBreakeven = 0;
+        return;
+      }
+
+      // Calculate multiples
+      const multiple = targetMC / entryMC;
+      const upsideRaw = posSize * Math.max(0, multiple - 1);
+      const upsideAmount = upsideRaw * (1 - slippagePct); // Apply slippage to upside
+      const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
+
+      // Calculate EV
+      const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
+      
+      // Calculate break-even probability
+      const breakevenProb = (upsideAmount + downsideAmount) > 0 ? 
+        downsideAmount / (upsideAmount + downsideAmount) : 1;
+      
+      // Store for the button
+      currentBreakeven = breakevenProb;
+      
+      // Calculate R multiple
+      const R = downsideAmount > 0 ? (upsideAmount / downsideAmount) : 0;
+
+      // Animate value changes
+      const oldUpside = upside.textContent;
+      const oldDownside = downside.textContent;
+      const oldEV = evAmount.textContent;
+
+      // Update display with proper formatting
+      upside.textContent = `+${formatSOL(upsideAmount)} SOL`;
+      downside.textContent = `-${formatSOL(downsideAmount)} SOL`;
+      breakeven.textContent = `${(breakevenProb * 100).toFixed(0)}%`;
+
+      // Update verdict with both EV and R requirements
+      const isAllowed = ev > 0 && R >= 2;
+      const wasPositive = verdict.classList.contains('positive');
+      
+      if (isAllowed !== wasPositive) {
+        verdict.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          verdict.style.transform = 'scale(1)';
+        }, 100);
+      }
+      
+      verdict.className = isAllowed ? 'verdict positive' : 'verdict negative';
+      evAmount.textContent = `${ev >= 0 ? '+' : ''}${formatSOL(ev)} SOL`;
+      if (isAllowed) {
+        evLabel.textContent = `✓ Allowed (${R.toFixed(1)}R)`;
+      } else if (ev <= 0 && R < 2) {
+        evLabel.textContent = '✗ Fold (Bad EV & Low R)';
+      } else if (ev <= 0) {
+        evLabel.textContent = '✗ Fold (Negative EV)';
+      } else {
+        evLabel.textContent = `✗ Fold (R=${R.toFixed(1)} < 2)`;
+      }
+      evAmount.style.color = isAllowed ? 'var(--green)' : 'var(--red)';
+
+      // Micro animation on value change
+      if (oldEV !== evAmount.textContent) {
+        evAmount.style.transform = 'scale(1.05)';
+        setTimeout(() => {
+          evAmount.style.transform = 'scale(1)';
+        }, 150);
+      }
+
+      // Update previousEV for crossing detection
+      previousEV = ev;
+
+      // Save values
+      saveValues();
+    }
+
+    // Track previous EV for crossing detection
+    let previousEV = 0;
+
+    // Update confidence display with haptic-like feedback
+    confidence.addEventListener('input', (e) => {
+      const value = e.target.value;
+      confidenceDisplay.textContent = value + '%';
+      
+      // Scale the display slightly on change
+      confidenceDisplay.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        confidenceDisplay.style.transform = 'scale(1)';
+      }, 100);
+      
+      // Calculate new EV to detect crossing
+      const entryMC = parseShorthand(entry.value);
+      const targetMC = parseShorthand(target.value);
+      const posSize = parseFloat(position.value) || 0;
+      const maxLossPct = parseFloat(maxLoss.value) || 25;
+      const slippagePct = Math.min(50, Math.max(0, parseFloat(slippage.value) || 0)) / 100;
+      const conf = parseFloat(value) / 100;
+      
+      if (entryMC > 0 && targetMC > 0 && posSize > 0) {
+        const multiple = targetMC / entryMC;
+        const upsideRaw = posSize * Math.max(0, multiple - 1);
+        const upsideAmount = upsideRaw * (1 - slippagePct);
+        const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
+        const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
+        
+        // Vibrate when crossing zero EV
+        if ('vibrate' in navigator) {
+          if ((previousEV <= 0 && ev > 0) || (previousEV >= 0 && ev < 0)) {
+            navigator.vibrate(20);
+          } else if (value == 10 || value == 20 || value == 30) {
+            navigator.vibrate(10);
+          }
+        }
+        
+        previousEV = ev;
+      }
+      
+      calculate();
+    });
+
+    // Handle market cap inputs with smart formatting
+    function handleMarketCapInput(input, previewId) {
+      let lastValue = input.value;
+      const preview = $(previewId);
+      
+      input.addEventListener('input', (e) => {
+        let value = input.value;
+        
+        // Allow typing numbers, commas, dots, and K/M/B
+        if (!/^[\d,\.KkMmBb]*$/.test(value)) {
+          input.value = lastValue;
+          return;
+        }
+        
+        lastValue = value;
+        
+        // Show preview if shorthand is used
+        if (/[KkMmBb]/.test(value)) {
+          const num = parseShorthand(value);
+          if (num > 0) {
+            preview.textContent = '= $' + formatWithCommas(Math.round(num));
+          } else {
+            preview.textContent = '';
+          }
+        } else {
+          preview.textContent = '';
+        }
+        
+        // Calculate after brief delay
+        clearTimeout(calculateTimeout);
+        calculateTimeout = setTimeout(calculate, 50);
+      });
+      
+      // Format on blur for cleaner display
+      input.addEventListener('blur', () => {
+        const num = parseShorthand(input.value);
+        if (num > 0) {
+          // Keep shorthand if they typed it, otherwise show with commas
+          if (!/[KkMmBb]/.test(input.value)) {
+            input.value = formatWithCommas(Math.round(num));
+          }
+        }
+        // Clear preview on blur
+        preview.textContent = '';
+      });
+      
+      // Select all on focus for quick replacement
+      input.addEventListener('focus', () => {
+        const num = parseShorthand(input.value);
+        if (num > 0 && !/[KkMmBb]/.test(input.value)) {
+          // If it's just a number with commas, remove commas for editing
+          input.value = input.value.replace(/,/g, '');
+        }
+        // Select all text for easy replacement
+        setTimeout(() => input.select(), 0);
+      });
+    }
+    
+    // Apply smart formatting to market cap inputs
+    handleMarketCapInput(entry, 'entry-preview');
+    handleMarketCapInput(target, 'target-preview');
+    
+    // Calculate on position, maxLoss and slippage inputs
+    let calculateTimeout;
+    [position, maxLoss, slippage].forEach(input => {
+      input.addEventListener('input', () => {
+        clearTimeout(calculateTimeout);
+        calculateTimeout = setTimeout(calculate, 50);
+      });
+    });
+    
+    // Add multiplier chip functionality
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const multiplier = parseFloat(chip.dataset.multiplier);
+        const entryMC = parseShorthand(entry.value);
+        if (entryMC > 0) {
+          const targetMC = entryMC * multiplier;
+          target.value = formatToShorthand(targetMC);
+          calculate();
+        }
+      });
+    });
+    
+    // Set to breakeven button
+    setBreakevenBtn.addEventListener('click', () => {
+      if (currentBreakeven > 0) {
+        const breakevenPct = Math.round(currentBreakeven * 100);
+        confidence.value = Math.min(50, Math.max(5, breakevenPct)); // Clamp to slider range
+        confidenceDisplay.textContent = confidence.value + '%';
+        
+        // Animate the confidence display
+        confidenceDisplay.style.transform = 'scale(1.2)';
+        confidenceDisplay.style.color = 'var(--amber)';
+        setTimeout(() => {
+          confidenceDisplay.style.transform = 'scale(1)';
+          confidenceDisplay.style.color = '';
+        }, 300);
+        
+        calculate();
+      }
+    });
+
+    // Track trade
+    function trackTrade(taken) {
+      const conf = parseFloat(confidence.value);
+      tradeHistory.push({
+        confidence: conf,
+        taken: taken,
+        timestamp: Date.now()
+      });
+      
+      // Keep only last 20 trades
+      if (tradeHistory.length > 20) {
+        tradeHistory.shift();
+      }
+      
+      localStorage.setItem('evHistory', JSON.stringify(tradeHistory));
+      
+      // Update confidence tracking
+      if (taken) {
+        confidenceSum += conf;
+        confidenceCount++;
+        
+        // Show calibration hint after 10 trades
+        if (confidenceCount >= 10) {
+          const avgConfidence = confidenceSum / confidenceCount;
+          historyText.textContent = `Your avg confidence: ${avgConfidence.toFixed(0)}% • Consider adjusting`;
+          history.classList.add('visible');
+          
+          setTimeout(() => {
+            history.classList.remove('visible');
+          }, 5000);
+        }
+      }
+    }
+
+    // Button actions
+    skipBtn.addEventListener('click', () => {
+      trackTrade(false);
+      
+      // Animate the clear
+      verdict.style.opacity = '0.5';
+      verdict.style.transform = 'scale(0.95)';
+      
+      setTimeout(() => {
+        // Clear for next trade
+        entry.value = '';
+        target.value = '';
+        position.value = '';
+        maxLoss.value = 25;
+        slippage.value = 0;
+        confidence.value = 20;
+        confidenceDisplay.textContent = '20%';
+        calculate();
+        
+        verdict.style.opacity = '1';
+        verdict.style.transform = 'scale(1)';
+        
+        // Focus on first input for quick next trade
+        entry.focus();
+      }, 200);
+    });
+
+    tradeBtn.addEventListener('click', () => {
+      trackTrade(true);
+      
+      // Visual feedback with better animation
+      tradeBtn.style.background = 'var(--green)';
+      tradeBtn.style.transform = 'scale(1.05)';
+      tradeBtn.innerHTML = '<span style="display: inline-block; animation: fadeIn 0.3s">✓ Logged</span>';
+      
+      // Haptic feedback on mobile
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50, 50, 50]);
+      }
+      
+      setTimeout(() => {
+        tradeBtn.style.background = '';
+        tradeBtn.style.transform = 'scale(1)';
+        tradeBtn.textContent = 'Take Trade';
+        
+        // Smooth transition out
+        verdict.style.opacity = '0.5';
+        verdict.style.transform = 'scale(0.95)';
+        
+        setTimeout(() => {
+          // Clear for next trade
+          entry.value = '';
+          target.value = '';
+          position.value = '';
+          maxLoss.value = 25;
+          slippage.value = 0;
+          confidence.value = 20;
+          confidenceDisplay.textContent = '20%';
+          calculate();
+          
+          verdict.style.opacity = '1';
+          verdict.style.transform = 'scale(1)';
+          
+          // Focus on first input for quick next trade
+          entry.focus();
+        }, 200);
+      }, 1500);
+    });
+
+    // Initialize
+    loadLastValues();
+    calculate();
+
+    // Load confidence history
+    tradeHistory.forEach(trade => {
+      if (trade.taken) {
+        confidenceSum += trade.confidence;
+        confidenceCount++;
+      }
+    });
+    // Add fade in animation style
+    const style = document.createElement('style');
+    style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .chip {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: var(--gray-900);
+      border: 1px solid var(--gray-800);
+      color: var(--gray-300);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .chip:hover {
+      background: var(--gray-800);
+      color: var(--white);
+      transform: scale(1.05);
+    }
+    
+    .chip:active {
+      transform: scale(0.95);
+    }
+    `;
+    document.head.appendChild(style);
+
+    // Prevent zoom on double tap (iOS)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+      const now = Date.now();
+      if (now - lastTouchEnd <= 300) {
+        e.preventDefault();
+      }
+      lastTouchEnd = now;
+    }, false);
+  </script>
+</body>
+</html>

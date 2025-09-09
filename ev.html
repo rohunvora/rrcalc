@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Is This Trade Worth It?</title>
+  <style>
+    :root{
+      --bg:#0b0d11;--panel:#11141a;--ink:#e8ecf3;--muted:#9aa4b2;--good:#10b981;--bad:#ef4444;--warn:#f59e0b;--border:#202531;--chip:#1a1f2b;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.35 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial}
+    .wrap{max-width:800px;margin:18px auto;padding:0 14px}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    h1{font-size:20px;margin:0}
+    .sub{color:var(--muted);font-size:13px}
+    .card{background:linear-gradient(180deg,var(--panel),#0f1218);border:1px solid var(--border);border-radius:14px;padding:14px}
+    label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
+    input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--border);background:#0e1117;color:var(--ink);outline:none}
+    input:focus{border-color:#2a3140;box-shadow:0 0 0 2px rgba(96,165,250,.15)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .full{grid-column:1 / -1}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    button{cursor:pointer;border:1px solid var(--border);background:#10141b;color:var(--ink);padding:10px 12px;border-radius:12px}
+    button.ghost{background:transparent}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .chip{padding:6px 10px;border-radius:999px;background:#0f131b;border:1px solid var(--border);color:var(--ink);font-size:12px}
+    .kpi{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .kpi .box{background:#0e1218;border:1px solid var(--border);border-radius:12px;padding:12px}
+    .kpi .label{font-size:12px;color:var(--muted)}
+    .kpi .val{font-size:20px;font-weight:700;margin-top:6px}
+    .note{color:var(--muted);font-size:12px}
+    .pill{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px;color:var(--muted)}
+    .verdict{margin-top:12px;padding:14px;border-radius:12px;border:1px solid var(--border);font-weight:700;font-size:18px}
+    .verdict.good{background:rgba(16,185,129,.1);color:#b1f6d9;border-color:#1e3c32}
+    .verdict.bad{background:rgba(239,68,68,.08);color:#fecaca;border-color:#3a1517}
+    .mini{font-size:12px;color:var(--muted);margin-top:6px}
+    .evbadge{margin:8px 0 12px;padding:14px;border-radius:14px;border:1px solid var(--border);font-size:22px;font-weight:800;text-align:center}
+    .evbadge.good{background:rgba(16,185,129,.1);color:#b1f6d9;border-color:#1e3c32}
+    .evbadge.bad{background:rgba(239,68,68,.08);color:#fecaca;border-color:#3a1517}
+    @media (max-width:720px){.grid,.row,.kpi{grid-template-columns:1fr}}
+  </style>
+  <meta name="description" content="Type a few numbers. Get a go/no-go on your trade." />
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Is this trade worth it?</h1>
+        <div class="sub">Type three numbers. Get a go/no-go.</div>
+      </div>
+      <div class="toolbar">
+        <button id="demo">Load Demo</button>
+        <button class="ghost" id="reset">Reset</button>
+      </div>
+    </header>
+
+    <div id="evBadge" class="evbadge bad">0% expected value</div>
+    <div class="mini" id="evLine">—</div>
+
+    <section class="card" aria-labelledby="inputs">
+      <h3 id="inputs" class="sub" style="margin:0 0 6px">Inputs</h3>
+      <div class="grid">
+        <div>
+          <label for="entryMc">Entry Market Cap (USD)</label>
+          <input id="entryMc" type="number" inputmode="decimal" placeholder="e.g., 2000000" />
+        </div>
+        <div>
+          <label for="targetMc">Target Market Cap (USD)</label>
+          <input id="targetMc" type="number" inputmode="decimal" placeholder="e.g., 10000000" />
+          <div class="chips" id="targetChips" aria-label="Quick targets">
+            <button type="button" class="chip" data-m="2">×2</button>
+            <button type="button" class="chip" data-m="5">×5</button>
+            <button type="button" class="chip" data-m="10">×10</button>
+            <button type="button" class="chip" data-m="50">×50</button>
+          </div>
+        </div>
+
+        <div class="full">
+          <label for="positionUsd">Position Size (USD)</label>
+          <input id="positionUsd" type="number" inputmode="decimal" placeholder="e.g., 2500" />
+        </div>
+
+        <div>
+          <label for="pSuccess">Chance it reaches target (%)</label>
+          <input id="pSuccess" type="number" inputmode="decimal" placeholder="e.g., 10" />
+          <div class="mini">Breakeven: <span id="pStarInline">0%</span> <button type="button" id="setPStar" class="chip" style="margin-left:6px">Set</button></div>
+        </div>
+
+        <details class="full">
+          <summary class="sub" style="cursor:pointer">More options</summary>
+          <div class="row" style="margin-top:6px">
+            <div>
+              <label for="stopPct">Stop Distance (% from Entry)</label>
+              <input id="stopPct" type="number" inputmode="decimal" placeholder="e.g., 25" />
+            </div>
+            <div>
+              <label for="haircut">Expected exit slippage (%)</label>
+              <input id="haircut" type="number" inputmode="decimal" placeholder="e.g., 30" />
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:12px" aria-labelledby="outputs">
+      <h3 id="outputs" class="sub" style="margin:0 0 6px">Supporting Numbers</h3>
+      <div class="kpi">
+        <div class="box">
+          <div class="label">R Multiple</div>
+          <div class="val" id="kR">0.0 R</div>
+        </div>
+        <div class="box">
+          <div class="label">Upside (USD)</div>
+          <div class="val" id="kUpside">$0</div>
+          <div class="note" id="kUpsideNote">after exit slippage</div>
+        </div>
+        <div class="box">
+          <div class="label">Downside at Stop (USD)</div>
+          <div class="val" id="kDownside">$0</div>
+        </div>
+        <div class="box">
+          <div class="label">Breakeven p%</div>
+          <div class="val" id="kPStar">0%</div>
+        </div>
+      </div>
+
+      <div id="verdict" class="verdict bad" role="status" aria-live="polite">Enter values to evaluate</div>
+      <div class="mini" id="explain">—</div>
+      <div class="mini" style="margin-top:6px">Assumes price ≈ market cap (circulating supply stable). Exit slippage reduces upside only.</div>
+    </section>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const read = id => +($(id).value || 0);
+    const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
+    const fmtUsd = n => isFinite(n) ? n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}) : '$0';
+    const fmtPct0 = x => isFinite(x) ? (x*100).toFixed(0)+'%' : '0%';
+    const fmtPct1 = x => isFinite(x) ? (x*100).toFixed(1)+'%' : '0%';
+    const fmtPctSigned0 = x => {
+      if(!isFinite(x)) return '0%';
+      const v = (x*100);
+      const s = v>0?'+':'';
+      return s + v.toFixed(0) + '%';
+    };
+
+    function calc(){
+      const entryMc = read('entryMc');
+      const targetMc = read('targetMc');
+      const positionUsd = read('positionUsd');
+      const rawStop = read('stopPct');
+      const stopPct = clamp((rawStop || 25)/100, 0, 0.95); // default 25% if blank
+      const pSuccess = clamp(read('pSuccess')/100, 0, 1);
+      const haircut = clamp(read('haircut')/100, 0, 0.95);
+
+      let upsideRaw = 0, upside = 0, downside = 0, R = 0, EV = 0, EVpct = 0, pStar = 1;
+
+      const hasBasics = entryMc>0 && targetMc>0 && positionUsd>0 && stopPct>0;
+
+      if(hasBasics){
+        const multiple = entryMc>0 ? (targetMc/entryMc) : 0;
+        const gain = Math.max(0, multiple - 1);
+        upsideRaw = positionUsd * gain;
+        upside = upsideRaw * (1 - haircut);
+        downside = positionUsd * stopPct;
+
+        R = downside>0 ? (upside / downside) : 0;
+        EV = (pSuccess * upside) - ((1 - pSuccess) * downside);
+        EVpct = positionUsd>0 ? (EV / positionUsd) : 0;
+        const denom = upside + downside;
+        pStar = denom>0 ? (downside / denom) : 1; // breakeven probability
+      }
+
+      $('kUpside').textContent = fmtUsd(upside);
+      $('kDownside').textContent = fmtUsd(downside);
+      $('kR').textContent = (isFinite(R)?R:0).toFixed(1)+' R';
+      $('kPStar').textContent = (pStar*100).toFixed(0)+'%';
+      const badge = $('evBadge');
+      badge.textContent = fmtPctSigned0(EVpct) + ' expected value';
+      badge.className = 'evbadge ' + ((EVpct>0)?'good':'bad');
+
+      const verdict = $('verdict');
+      const explain = $('explain');
+      if(!hasBasics){
+        verdict.className = 'verdict bad';
+        verdict.textContent = 'Enter values to evaluate';
+        explain.textContent = 'Needs EntryMC, TargetMC, Position$, Stop%.';
+        $('pStarInline').textContent = (pStar*100).toFixed(0)+'%';
+        $('evLine').textContent = '—';
+        return;
+      }
+
+      const good = EV>0 && R>=2;
+      verdict.className = 'verdict ' + (good?'good':'bad');
+      verdict.textContent = good ? 'Allowed — Positive EV and R ≥ 2'
+                                 : 'Fold — Negative EV or R < 2';
+      const line = `p=${(pSuccess*100).toFixed(0)}%, breakeven=${(pStar*100).toFixed(0)}%` + (upside>0?`, raw upside ${fmtUsd(upsideRaw)}`:'');
+      explain.textContent = line;
+      $('pStarInline').textContent = (pStar*100).toFixed(0)+'%';
+      $('evLine').textContent = (good?'Allowed':'Fold') + ' — ' + line;
+    }
+
+    ;['entryMc','targetMc','positionUsd','stopPct','pSuccess','haircut'].forEach(id=>{
+      $(id).addEventListener('input', calc);
+    });
+
+    // Target quick chips
+    document.addEventListener('click', (e)=>{
+      const btn = e.target.closest('#targetChips [data-m]');
+      if(!btn) return;
+      const m = +btn.dataset.m;
+      const entryMc = read('entryMc');
+      if(entryMc>0 && m>0){
+        $('targetMc').value = Math.round(entryMc * m);
+        calc();
+      }
+    });
+
+    // Set success to breakeven
+    $('setPStar').onclick = ()=>{
+      const txt = $('pStarInline').textContent.replace('%','');
+      const v = +txt;
+      if(isFinite(v)){
+        $('pSuccess').value = v;
+        calc();
+      }
+    };
+
+    $('demo').onclick = ()=>{
+      $('entryMc').value = 2000000;
+      $('targetMc').value = 10000000;
+      $('positionUsd').value = 2500;
+      $('stopPct').value = 25;
+      $('pSuccess').value = 10;
+      $('haircut').value = 30;
+      calc();
+    };
+    $('reset').onclick = ()=>{
+      ;['entryMc','targetMc','positionUsd','stopPct','pSuccess','haircut'].forEach(id=>$(id).value='');
+      calc();
+    };
+
+    // initial render
+    calc();
+  </script>
+</body>
+</html>

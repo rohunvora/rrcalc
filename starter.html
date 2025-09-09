@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shitcoin EV & Dot Planner</title>
+  <style>
+    :root{
+      --bg:#0b0d11;--panel:#12151b;--panel2:#171b22;--ink:#e8ecf3;--muted:#9aa4b2;--accent:#6ee7b7;--accent2:#60a5fa;--warn:#fbbf24;--bad:#ef4444;--good:#10b981;--chip:#1f2530;--border:#222835;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;color:var(--ink);background:linear-gradient(180deg,#0b0d11,#0b0d11 40%,#0a0c10);
+    }
+    .wrap{max-width:1100px;margin:28px auto;padding:0 16px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+    h1{font-size:22px;margin:0}
+    .sub{color:var(--muted);font-size:13px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:16px;padding:16px}
+    .span-4{grid-column:span 4}
+    .span-6{grid-column:span 6}
+    .span-8{grid-column:span 8}
+    .span-12{grid-column:span 12}
+    label{display:block;font-size:12px;color:var(--muted);margin:8px 0 6px}
+    input, select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0e1117;color:var(--ink);outline:none}
+    input:focus{border-color:#2b3342;box-shadow:0 0 0 2px rgba(96,165,250,.15)}
+    .row{display:grid;grid-template-columns:repeat(12,1fr);gap:10px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:#10141b;color:var(--ink);cursor:pointer}
+    .btn:hover{background:#0f131a}
+    .btn.accent{background:linear-gradient(90deg,#0d1b12,#0e1f16);border-color:#173d2e;color:#b9f3d8}
+    .btn.ghost{background:transparent}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:var(--chip);border:1px solid var(--border);font-size:12px;color:var(--muted)}
+    .pill.good{color:#b1f6d9;border-color:#1e3c32;background:rgba(16,185,129,.08)}
+    .pill.bad{color:#fecaca;border-color:#3a1517;background:rgba(239,68,68,.08)}
+    .pill.warn{color:#fde68a;border-color:#3a2b12;background:rgba(251,191,36,.08)}
+    table{width:100%;border-collapse:separate;border-spacing:0 8px}
+    th,td{padding:10px 12px;text-align:left;font-size:13px}
+    thead th{color:var(--muted);font-weight:600}
+    tbody tr{background:#0e1218;border:1px solid var(--border)}
+    tbody td:first-child, thead th:first-child{border-top-left-radius:10px;border-bottom-left-radius:10px}
+    tbody td:last-child, thead th:last-child{border-top-right-radius:10px;border-bottom-right-radius:10px}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+    .kpi .box{background:#0e1218;border:1px solid var(--border);border-radius:14px;padding:12px}
+    .kpi .label{font-size:12px;color:var(--muted)}
+    .kpi .val{font-weight:700;font-size:18px;margin-top:6px}
+    .muted{color:var(--muted)}
+    .right{text-align:right}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+    .switch{display:inline-flex;align-items:center;gap:8px}
+    .switch input{width:auto}
+    .note{font-size:12px;color:var(--muted)}
+    .danger{color:#fecaca}
+    .success{color:#b1f6d9}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    @media (max-width:960px){.span-4,.span-6,.span-8{grid-column:span 12}.kpi{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Shitcoin EV & Dot Planner</h1>
+      <span class="sub">Do the math before you click. Green dots (buys), red dots (sells), red X (stop).</span>
+    </header>
+
+    <div class="grid">
+      <!-- Position -->
+      <section class="card span-4">
+        <h3>Position</h3>
+        <label>Entry Market Cap (USD)</label>
+        <input id="entryMc" type="number" inputmode="decimal" placeholder="e.g., 2000000" />
+
+        <div class="row">
+          <div style="grid-column:span 6">
+            <label>Position Size (SOL)</label>
+            <input id="posSol" type="number" inputmode="decimal" placeholder="e.g., 20" />
+          </div>
+          <div style="grid-column:span 6">
+            <label>SOL Price (USD)</label>
+            <input id="solUsd" type="number" inputmode="decimal" placeholder="e.g., 150" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div style="grid-column:span 6">
+            <label>Daily Volume (USD)</label>
+            <input id="dayVol" type="number" inputmode="decimal" placeholder="e.g., 500000" />
+          </div>
+          <div style="grid-column:span 6">
+            <label>Liquidity Haircut (%)</label>
+            <input id="haircut" type="number" inputmode="decimal" placeholder="e.g., 20" />
+          </div>
+        </div>
+
+        <div class="toolbar" style="margin-top:10px">
+          <button class="btn" id="preset5">Preset Ladder +25/+40/+60/+100/+150</button>
+          <button class="btn ghost" id="clearAll">Clear</button>
+        </div>
+      </section>
+
+      <!-- Exits (Red Dots) -->
+      <section class="card span-8">
+        <h3>Red Dots (Sells on Green)</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Target Type</th>
+              <th class="mono">% over Entry</th>
+              <th class="mono">Target MC (USD)</th>
+              <th class="mono">% of Position</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="rungs"></tbody>
+        </table>
+        <div class="footer">
+          <button class="btn accent" id="addRung">+ Add Red Dot</button>
+          <span class="note">Tip: earlier dots larger; later smaller. Haircut reduces realized exit.</span>
+        </div>
+      </section>
+
+      <!-- Risk / Stop -->
+      <section class="card span-4">
+        <h3>Stop (Red X)</h3>
+        <label>Stop Method</label>
+        <select id="stopMode">
+          <option value="entry">% below Entry</option>
+          <option value="ath">% below Local High</option>
+        </select>
+        <label>Stop Distance (%)</label>
+        <input id="stopPct" type="number" inputmode="decimal" placeholder="e.g., 20" />
+
+        <h3 style="margin-top:16px">Probabilities</h3>
+        <label>Probability of Success (%)<br><span class="note">Reaching/printing your red dots.</span></label>
+        <input id="pSuccess" type="number" inputmode="decimal" placeholder="e.g., 15" />
+      </section>
+
+      <!-- Output -->
+      <section class="card span-8">
+        <h3>Math Output</h3>
+        <div class="kpi" style="margin-bottom:10px">
+          <div class="box">
+            <div class="label">Blended Upside (USD)</div>
+            <div class="val" id="kUpside">$0</div>
+            <div class="note">After haircut, if success</div>
+          </div>
+          <div class="box">
+            <div class="label">Downside at Stop (USD)</div>
+            <div class="val" id="kDownside">$0</div>
+            <div class="note">If fail (no dots hit)</div>
+          </div>
+          <div class="box">
+            <div class="label">R Multiple</div>
+            <div class="val" id="kR">0.0 R</div>
+            <div class="note">Upside ÷ Downside</div>
+          </div>
+          <div class="box">
+            <div class="label">Expected Value</div>
+            <div class="val" id="kEV">$0</div>
+            <div class="note">p*Upside + (1-p)*(-Downside)</div>
+          </div>
+          <div class="box">
+            <div class="label">Break-even Probability</div>
+            <div class="val" id="kPBreakEven">0%</div>
+            <div class="note">Min p for EV ≥ 0</div>
+          </div>
+        </div>
+        <div class="toolbar" id="riskPills"></div>
+        <div class="note" style="margin-top:10px">Sanity: If planned exit $ ≫ daily volume, trap risk is high—reduce size or widen dots.
+        </div>
+      </section>
+
+      <!-- Notes / Ritual -->
+      <section class="card span-12">
+        <h3>Pre-Trade Gate (60s)</h3>
+        <ol>
+          <li>Place green dot (entry). If you can’t place three proud red dots above price, <span class="danger">do not enter</span>.</li>
+          <li>Fill inputs. If EV ≤ 0 or R &lt; 2, <span class="danger">fold</span>.</li>
+          <li>If Exit/DayVol &gt; 0.2 → <span class="warn">trap risk</span>; size down or skip.</li>
+          <li>Place the orders: red dots (limits) + stop (OCO). Hide market-sell.</li>
+        </ol>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Helpers
+    const $ = id => document.getElementById(id);
+    const fmtUsd = n => isFinite(n) ? n.toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0}) : '$0';
+    const clamp = (v,min,max)=> Math.min(max,Math.max(min,v));
+
+    // State
+    const state = {
+      rungs: [], // {pctOver:number, targetMc:number, pctSize:number, type:'pct'|'mc'}
+    };
+
+    function save(){
+      const payload = {
+        entryMc: +$('entryMc').value||0,
+        posSol: +$('posSol').value||0,
+        solUsd: +$('solUsd').value||0,
+        dayVol: +$('dayVol').value||0,
+        haircut: +$('haircut').value||0,
+        stopMode: $('stopMode').value,
+        stopPct: +$('stopPct').value||0,
+        pSuccess: +$('pSuccess').value||0,
+        rungs: state.rungs,
+      };
+      localStorage.setItem('dotPlanner', JSON.stringify(payload));
+    }
+    function load(){
+      const raw = localStorage.getItem('dotPlanner');
+      if(!raw) return;
+      try{
+        const d = JSON.parse(raw);
+        $('entryMc').value = d.entryMc||'';
+        $('posSol').value = d.posSol||'';
+        $('solUsd').value = d.solUsd||'';
+        $('dayVol').value = d.dayVol||'';
+        $('haircut').value = d.haircut||'';
+        $('stopMode').value = d.stopMode||'entry';
+        $('stopPct').value = d.stopPct||'';
+        $('pSuccess').value = d.pSuccess||'';
+        state.rungs = Array.isArray(d.rungs)? d.rungs: [];
+      }catch(e){console.warn('load fail',e)}
+    }
+
+    // UI: Rungs table
+    function renderRungs(){
+      const tbody = $('rungs');
+      tbody.innerHTML = '';
+      state.rungs.forEach((r,i)=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="mono">${i+1}</td>
+          <td>
+            <select data-k="type" data-i="${i}">
+              <option value="pct" ${r.type==='pct'?'selected':''}>% over Entry</option>
+              <option value="mc" ${r.type==='mc'?'selected':''}>Target MC</option>
+            </select>
+          </td>
+          <td>
+            <input data-k="pctOver" data-i="${i}" type="number" inputmode="decimal" value="${r.pctOver??''}" ${r.type==='mc'?'disabled':''} placeholder="e.g., 25" />
+          </td>
+          <td>
+            <input data-k="targetMc" data-i="${i}" type="number" inputmode="decimal" value="${r.targetMc??''}" ${r.type==='pct'?'disabled':''} placeholder="e.g., 3500000" />
+          </td>
+          <td>
+            <input data-k="pctSize" data-i="${i}" type="number" inputmode="decimal" value="${r.pctSize??''}" placeholder="e.g., 20" />
+          </td>
+          <td class="right">
+            <button class="btn ghost" data-action="del" data-i="${i}">Remove</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+
+      // wire events
+      tbody.querySelectorAll('select, input, button').forEach(el=>{
+        el.oninput = onRungChange;
+        el.onclick = onRungClick;
+      });
+      calc();
+      save();
+    }
+
+    function onRungChange(e){
+      const el = e.target; const i = +el.dataset.i; const k = el.dataset.k;
+      if(el.tagName==='SELECT'){
+        state.rungs[i].type = el.value;
+      } else {
+        const v = +el.value; if(!isFinite(v)) return;
+        state.rungs[i][k] = v;
+      }
+      renderRungs();
+    }
+    function onRungClick(e){
+      const el = e.target; if(el.dataset.action==='del'){
+        state.rungs.splice(+el.dataset.i,1);
+        renderRungs();
+      }
+    }
+
+    function addRung(data={type:'pct', pctOver:'', targetMc:'', pctSize:''}){
+      state.rungs.push(data); renderRungs();
+    }
+
+    // Core calc
+    function calc(){
+      const entryMc = +$('entryMc').value||0;
+      const posSol = +$('posSol').value||0;
+      const solUsd = +$('solUsd').value||0;
+      const dayVol = +$('dayVol').value||0;
+      const haircut = clamp( ( +$('haircut').value||0 )/100, 0, 0.95);
+      const stopPct = clamp( ( +$('stopPct').value||0 )/100, 0, 0.95);
+      const pSuccess = clamp( ( +$('pSuccess').value||0 )/100, 0, 1);
+
+      const entryUsd = posSol * solUsd; // position cost
+      // Build exits
+      let totalPctSize = 0;
+      let blendedProceeds = 0; // USD proceeds if success (after haircut)
+      let plannedExitUsd = 0; // raw before haircut
+
+      state.rungs.forEach(r=>{
+        const pct = clamp((+r.pctSize||0)/100,0,1);
+        totalPctSize += pct;
+        let tgtMc = 0;
+        if(r.type==='pct'){
+          tgtMc = entryMc * (1 + ( (+r.pctOver||0)/100 ));
+        } else {
+          tgtMc = +r.targetMc||0;
+        }
+        // Assume price scales with MC linearly for this quick model
+        const multiple = entryMc>0 ? (tgtMc/entryMc) : 0;
+        const rungProceeds = entryUsd * multiple * pct * (1 - haircut);
+        blendedProceeds += rungProceeds;
+        plannedExitUsd += entryUsd * multiple * pct;
+      });
+
+      // Downside if fail (assume stop hits before any rung):
+      const downsideUsd = entryUsd * stopPct; // % loss vs entry
+
+      // R multiple (Upside/Downside)
+      const R = downsideUsd>0 ? (blendedProceeds / downsideUsd) : 0;
+
+      // EV
+      const EV = (pSuccess * blendedProceeds) - ((1 - pSuccess) * downsideUsd);
+      // Break-even probability (EV ≥ 0)
+      const denom = blendedProceeds + downsideUsd;
+      const pBreakEven = denom > 0 ? (downsideUsd / denom) : 1;
+
+      // Risk pills
+      const pills = [];
+      if(totalPctSize < 0.99 || totalPctSize > 1.01){
+        pills.push({t:'Allocation ≠ 100% ('+Math.round(totalPctSize*100)+'%)',k:'warn'});
+      } else pills.push({t:'Allocation = 100%',k:'good'});
+      if(dayVol>0){
+        const exitToVol = plannedExitUsd / dayVol; // before haircut; conservative
+        let k='good', label='Exit/DayVol '+(exitToVol*100).toFixed(0)+'%';
+        if(exitToVol>0.4){k='bad'} else if(exitToVol>0.2){k='warn'}
+        pills.push({t:label,k});
+      }
+      if(R>=3) pills.push({t:'R ≥ 3 (strong)',k:'good'});
+      else if(R>=2) pills.push({t:'R ≥ 2 (ok)',k:'warn'});
+      else pills.push({t:'R < 2 (skip)',k:'bad'});
+      // Breakeven probability signal
+      if(isFinite(pBreakEven)){
+        if(pSuccess < pBreakEven) pills.push({t:'p < breakeven ('+Math.round(pBreakEven*100)+'%)',k:'bad'});
+        else pills.push({t:'p ≥ breakeven ('+Math.round(pBreakEven*100)+'%)',k:'good'});
+      }
+
+      $('kUpside').textContent = fmtUsd(blendedProceeds);
+      $('kDownside').textContent = fmtUsd(downsideUsd);
+      $('kR').textContent = (isFinite(R)?R:0).toFixed(1)+' R';
+      $('kEV').textContent = fmtUsd(EV);
+      $('kPBreakEven').textContent = (isFinite(pBreakEven)?(pBreakEven*100):0).toFixed(0)+'%';
+
+      const rp = $('riskPills'); rp.innerHTML='';
+      pills.forEach(p=>{
+        const span = document.createElement('span');
+        span.className = 'pill '+(p.k==='good'?'good':p.k==='bad'?'bad':'warn');
+        span.textContent = p.t; rp.appendChild(span);
+      });
+
+      save();
+    }
+
+    // Events
+    ['entryMc','posSol','solUsd','dayVol','haircut','stopMode','stopPct','pSuccess'].forEach(id=>{
+      $(id).addEventListener('input', calc);
+    });
+
+    $('addRung').onclick = ()=> addRung();
+    $('preset5').onclick = ()=>{
+      state.rungs = [
+        {type:'pct', pctOver:25, targetMc:'', pctSize:20},
+        {type:'pct', pctOver:40, targetMc:'', pctSize:20},
+        {type:'pct', pctOver:60, targetMc:'', pctSize:20},
+        {type:'pct', pctOver:100, targetMc:'', pctSize:20},
+        {type:'pct', pctOver:150, targetMc:'', pctSize:20},
+      ];
+      renderRungs();
+    };
+
+    $('clearAll').onclick = ()=>{
+      $('entryMc').value=''; $('posSol').value=''; $('solUsd').value=''; $('dayVol').value=''; $('haircut').value=''; $('stopPct').value=''; $('pSuccess').value=''; state.rungs=[]; renderRungs();
+    };
+
+    // Init
+    load();
+    if(state.rungs.length===0){
+      // Starter with three dots
+      state.rungs = [
+        {type:'pct', pctOver:25, targetMc:'', pctSize:40},
+        {type:'pct', pctOver:60, targetMc:'', pctSize:35},
+        {type:'pct', pctOver:100, targetMc:'', pctSize:25},
+      ];
+    }
+    renderRungs();
+  </script>
+</body>
+</html>
