@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>EV Check - Clean Version</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      padding: 24px 20px 200px 20px;
+    }
+
+    .container {
+      max-width: 428px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 34px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      font-size: 15px;
+      color: #a3a3a3;
+    }
+
+    .input-group {
+      margin-bottom: 24px;
+    }
+
+    .input-wrapper {
+      margin-bottom: 16px;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 12px;
+      color: #737373;
+      margin-bottom: 6px;
+    }
+
+    .input-field {
+      width: 100%;
+      min-height: 44px;
+      height: 54px;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 17px;
+      color: #ffffff;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-field:focus {
+      background: #1a1a1a;
+      border-color: #404040;
+    }
+
+    .input-hint {
+      font-size: 12px;
+      color: #737373;
+      margin-top: 4px;
+    }
+
+    .multiplier-chips {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 16px;
+    }
+
+    .chip {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      background: #0a0a0a;
+      border: 1px solid #1a1a1a;
+      color: #d4d4d4;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chip:hover {
+      background: #1a1a1a;
+      color: #ffffff;
+      transform: scale(1.05);
+    }
+
+    .confidence-section {
+      background: linear-gradient(180deg, #11141a, #0f1218);
+      border: 1px solid #202531;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 24px 0;
+    }
+
+    .confidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .confidence-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .confidence-value {
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .slider {
+      width: 100%;
+      height: 44px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-track {
+      width: 100%;
+      height: 6px;
+      background: #1a1a1a;
+      border-radius: 3px;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      background: #ffffff;
+      border-radius: 50%;
+      cursor: grab;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.4);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #737373;
+    }
+
+    .sticky-card {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, #11141a, #0f1218);
+      border: 1px solid #202531;
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+      max-width: 428px;
+      margin: 0 auto;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.3);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+
+    .sticky-card.visible {
+      transform: translateY(0);
+    }
+
+    .sticky-card.allowed {
+      border-color: rgba(0,200,81,0.3);
+      background: linear-gradient(180deg, 
+        rgba(0,200,81,0.08), 
+        rgba(16,24,20,0.95));
+    }
+
+    .sticky-card.borderline {
+      border-color: rgba(255,171,0,0.3);
+      background: linear-gradient(180deg, 
+        rgba(255,171,0,0.08), 
+        rgba(24,20,16,0.95));
+    }
+
+    .sticky-card.fold {
+      border-color: rgba(255,59,48,0.3);
+      background: linear-gradient(180deg, 
+        rgba(255,59,48,0.08), 
+        rgba(24,16,16,0.95));
+    }
+
+    .verdict-amount {
+      font-size: 32px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .verdict-label {
+      font-size: 16px;
+      font-weight: 500;
+      text-align: center;
+      color: #d4d4d4;
+      margin-bottom: 16px;
+    }
+
+    .result-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .result-label {
+      font-size: 12px;
+      color: #737373;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .result-value {
+      font-size: 18px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Is this trade worth it?</h1>
+      <p>Type a few numbers. Get a go/no-go.</p>
+    </div>
+
+    <div class="input-group">
+      <div class="input-wrapper">
+        <label class="input-label" for="entry">Entry Market Cap</label>
+        <input type="text" id="entry" class="input-field" placeholder="e.g., 2.3M" />
+        <div class="input-hint">Where you'd buy</div>
+      </div>
+      
+      <div class="input-wrapper">
+        <label class="input-label" for="position">Position Size</label>
+        <input type="text" id="position" class="input-field" placeholder="e.g., 2.5k" />
+        <div class="input-hint">How much you'd put in</div>
+      </div>
+      
+      <div class="input-wrapper">
+        <label class="input-label" for="maxLoss">Max Loss</label>
+        <input type="number" id="maxLoss" class="input-field" placeholder="e.g., 25" min="0" max="95" />
+        <div class="input-hint">What you're okay losing (% of position)</div>
+      </div>
+      
+      <div class="input-wrapper">
+        <label class="input-label" for="target">Target Market Cap</label>
+        <input type="text" id="target" class="input-field" placeholder="e.g., 10M" />
+        <div class="input-hint">Where you'd be happy to sell</div>
+      </div>
+      
+      <div class="multiplier-chips">
+        <button class="chip" data-multiplier="2">×2</button>
+        <button class="chip" data-multiplier="5">×5</button>
+        <button class="chip" data-multiplier="10">×10</button>
+        <button class="chip" data-multiplier="50">×50</button>
+      </div>
+    </div>
+
+    <div class="confidence-section">
+      <div class="confidence-header">
+        <span class="confidence-title">Chance it reaches target</span>
+        <span class="confidence-value" id="confidence-display">20%</span>
+      </div>
+      <input type="range" id="confidence" class="slider" min="5" max="50" value="20" step="1" />
+      <div class="slider-labels">
+        <span>😰 5%</span>
+        <span>25%</span>
+        <span>50% 🚀</span>
+      </div>
+      <div class="input-hint" style="text-align: center; margin-top: 8px;">
+        <span>Gut feel.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Results Card -->
+  <div class="sticky-card" id="resultsCard">
+    <div class="verdict-amount" id="ev-amount">$0</div>
+    <div class="verdict-label" id="ev-label">Enter values above</div>
+    
+    <div class="result-summary">
+      <div>
+        <div class="result-label">EV %</div>
+        <div class="result-value" id="ev-percent">0%</div>
+      </div>
+      <div>
+        <div class="result-label">R Multiple</div>
+        <div class="result-value" id="r-multiple">0.0R</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const entry = $('entry');
+    const position = $('position');
+    const maxLoss = $('maxLoss');
+    const target = $('target');
+    const confidence = $('confidence');
+    const confidenceDisplay = $('confidence-display');
+    const resultsCard = $('resultsCard');
+    const evAmount = $('ev-amount');
+    const evLabel = $('ev-label');
+    const evPercent = $('ev-percent');
+    const rMultiple = $('r-multiple');
+
+    // Parse shorthand function
+    function parseShorthand(value) {
+      if (!value) return 0;
+      value = value.toString().replace(/,/g, '');
+      const upperValue = value.toUpperCase();
+      if (upperValue.endsWith('K')) {
+        return parseFloat(value) * 1000;
+      } else if (upperValue.endsWith('M')) {
+        return parseFloat(value) * 1000000;
+      } else if (upperValue.endsWith('B')) {
+        return parseFloat(value) * 1000000000;
+      }
+      return parseFloat(value) || 0;
+    }
+
+    // Format numbers
+    function formatNumber(value) {
+      const abs = Math.abs(value);
+      if (abs >= 1000) {
+        return value.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      } else if (abs >= 100) {
+        return value.toFixed(0);
+      } else if (abs >= 10) {
+        return value.toFixed(1);
+      } else {
+        return value.toFixed(2);
+      }
+    }
+
+    // Calculate EV
+    function calculate() {
+      console.log('Calculate called');
+      
+      const entryMC = parseShorthand(entry.value);
+      const targetMC = parseShorthand(target.value);
+      const posSize = parseShorthand(position.value);
+      const maxLossPct = parseFloat(maxLoss.value) || 25;
+      const conf = parseFloat(confidence.value) / 100;
+
+      console.log('Inputs:', { entryMC, targetMC, posSize, maxLossPct, conf });
+
+      // Check if we have minimum required inputs
+      const hasMinimumInputs = entryMC > 0 && targetMC > 0 && posSize > 0;
+      console.log('Has minimum inputs:', hasMinimumInputs);
+
+      if (!hasMinimumInputs) {
+        console.log('Hiding results card');
+        resultsCard.classList.remove('visible');
+        evAmount.textContent = '$0';
+        evLabel.textContent = 'Enter values above';
+        evPercent.textContent = '0%';
+        rMultiple.textContent = '0.0R';
+        return;
+      }
+
+      // Show results card
+      console.log('Showing results card');
+      resultsCard.classList.add('visible');
+
+      // Calculate
+      const multiple = targetMC / entryMC;
+      const upsideAmount = posSize * Math.max(0, multiple - 1);
+      const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
+      const R = downsideAmount > 0 ? (upsideAmount / downsideAmount) : 0;
+      const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
+      const evPct = posSize > 0 ? (ev / posSize) : 0;
+
+      console.log('Results:', { multiple, upsideAmount, downsideAmount, R, ev, evPct });
+
+      // Determine verdict
+      let verdictState;
+      if (ev > 0 && R >= 2) {
+        verdictState = 'allowed';
+        evLabel.textContent = 'Numbers align. Positive EV and R ≥ 2.';
+      } else if (Math.abs(evPct) <= 0.01 || (R >= 1.5 && R < 2)) {
+        verdictState = 'borderline';
+        evLabel.textContent = 'Close call. Consider improving R or reducing risk.';
+      } else {
+        verdictState = 'fold';
+        evLabel.textContent = 'Math doesn't support it. Reduce loss or raise target.';
+      }
+
+      // Update display
+      resultsCard.className = `sticky-card visible ${verdictState}`;
+      evAmount.textContent = `${ev >= 0 ? '+' : ''}$${formatNumber(ev)}`;
+      evPercent.textContent = `${(evPct * 100).toFixed(1)}%`;
+      rMultiple.textContent = `${R.toFixed(1)}R`;
+
+      // Color coding
+      const verdictColor = verdictState === 'allowed' ? '#00c851' : 
+                          verdictState === 'borderline' ? '#ffab00' : '#ff3b30';
+      evAmount.style.color = verdictColor;
+      evPercent.style.color = ev >= 0 ? '#00c851' : '#ff3b30';
+      rMultiple.style.color = R >= 2 ? '#00c851' : R >= 1.5 ? '#ffab00' : '#ff3b30';
+
+      console.log('Verdict:', verdictState);
+    }
+
+    // Update confidence display
+    confidence.addEventListener('input', (e) => {
+      console.log('Confidence changed to:', e.target.value);
+      confidenceDisplay.textContent = e.target.value + '%';
+      calculate();
+    });
+
+    // Calculate on input changes
+    [entry, position, maxLoss, target].forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    // Multiplier chips
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const multiplier = parseFloat(chip.dataset.multiplier);
+        const entryMC = parseShorthand(entry.value);
+        if (entryMC > 0) {
+          const targetMC = entryMC * multiplier;
+          if (targetMC >= 1000000) {
+            target.value = (targetMC / 1000000).toFixed(1) + 'M';
+          } else if (targetMC >= 1000) {
+            target.value = (targetMC / 1000).toFixed(0) + 'k';
+          } else {
+            target.value = targetMC.toString();
+          }
+          calculate();
+        }
+      });
+    });
+
+    // Initial calculation
+    calculate();
+
+    console.log('Clean version loaded successfully');
+  </script>
+</body>
+</html>
