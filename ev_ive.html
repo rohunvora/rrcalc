@@ -134,6 +134,7 @@
 
     .input-field {
       width: 100%;
+      min-height: 44px;
       height: 54px;
       background: var(--gray-900);
       border: 1px solid var(--gray-800);
@@ -314,7 +315,12 @@
       color: var(--gray-400);
       font-size: 14px;
       cursor: pointer;
-      padding: 4px;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .result-summary {
@@ -591,7 +597,7 @@
             type="number" 
             id="maxLoss" 
             class="input-field" 
-            placeholder="25"
+            placeholder="e.g., 25"
             inputmode="decimal"
             step="any"
             min="0"
@@ -607,7 +613,7 @@
             type="number" 
             id="slippage" 
             class="input-field" 
-            placeholder="0"
+            placeholder="e.g., 0"
             inputmode="decimal"
             step="any"
             min="0"
@@ -1033,6 +1039,14 @@
           } else {
             preview.textContent = '';
           }
+        } else if (value && !isNaN(parseFloat(value))) {
+          // Show formatted version for raw numbers
+          const num = parseFloat(value);
+          if (num >= 1000) {
+            preview.textContent = '= ' + formatWithCommas(Math.round(num));
+          } else {
+            preview.textContent = '';
+          }
         } else {
           preview.textContent = '';
         }
@@ -1183,7 +1197,9 @@
     }
     
     .chip {
-      padding: 6px 12px;
+      min-height: 44px;
+      min-width: 44px;
+      padding: 10px 16px;
       border-radius: 8px;
       background: var(--gray-900);
       border: 1px solid var(--gray-800);
@@ -1192,6 +1208,9 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.12s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .chip:hover {
