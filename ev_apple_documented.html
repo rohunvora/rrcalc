@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Trade Calculator</title>
+  
+  <style>
+    /* ================================================
+       RESET & BASE STYLES
+       ================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* Apple Typography Standards */
+    html {
+      font-size: 17px;          /* Apple base font size */
+      line-height: 1.47059;      /* Apple line height ratio */
+      font-weight: 400;
+      letter-spacing: -0.022em;  /* Apple letter spacing */
+    }
+
+    body {
+      /* Apple System Font Stack */
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: #f5f5f7;       /* Apple light gray background */
+      color: #1d1d1f;           /* Apple text black */
+      min-height: 100vh;
+      padding-bottom: 200px;     /* Space for sticky results card */
+    }
+
+    /* ================================================
+       LAYOUT CONTAINERS
+       ================================================ */
+    .container {
+      max-width: 980px;          /* Apple content width */
+      margin: 0 auto;
+      padding: 60px 22px 0;
+    }
+
+    /* ================================================
+       HERO SECTION
+       ================================================ */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .hero h1 {
+      font-size: 56px;           /* Apple hero size */
+      line-height: 1.07143;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: #1d1d1f;
+      margin-bottom: 12px;
+    }
+
+    .hero p {
+      font-size: 28px;           /* Apple subtitle size */
+      line-height: 1.14286;
+      font-weight: 400;
+      letter-spacing: .007em;
+      color: #86868b;            /* Apple gray text */
+      margin-bottom: 40px;
+    }
+
+    /* ================================================
+       MAIN CARD CONTAINER
+       ================================================ */
+    .main-card {
+      background: #ffffff;
+      border-radius: 18px;       /* Apple card radius */
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1), 0 8px 32px rgba(0,0,0,0.05);
+      padding: 48px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Rainbow gradient accent line */
+    .main-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      /* Apple rainbow gradient */
+      background: linear-gradient(90deg, #007AFF, #5856D6, #AF52DE, #FF2D92, #FF3B30, #FF9500, #FFCC02, #34C759, #32D74B, #007AFF);
+      opacity: 0.8;
+    }
+
+    /* ================================================
+       INPUT SECTION
+       ================================================ */
+    .input-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    /* Full width input group (spans both columns) */
+    .input-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 17px;
+      line-height: 1.47059;
+      font-weight: 600;
+      color: #1d1d1f;
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 56px;
+      background: #f6f6f6;      /* Light gray background */
+      border: 2px solid transparent;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 17px;
+      line-height: 1.47059;
+      color: #1d1d1f;
+      transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+      outline: none;
+      font-weight: 400;
+    }
+
+    /* Focus state with Apple blue glow */
+    .input-field:focus {
+      background: #ffffff;
+      border-color: #007AFF;     /* Apple blue */
+      box-shadow: 0 0 0 4px rgba(0,122,255,0.1);
+    }
+
+    .input-field::placeholder {
+      color: #86868b;
+      font-weight: 400;
+    }
+
+    .input-hint {
+      font-size: 14px;
+      line-height: 1.42857;
+      color: #86868b;
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    /* ================================================
+       MULTIPLIER CHIPS
+       ================================================ */
+    .chips-container {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .chip {
+      background: #f6f6f6;
+      border: 2px solid transparent;
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 15px;
+      font-weight: 500;
+      color: #1d1d1f;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+      min-height: 44px;          /* iOS touch target minimum */
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chip:hover {
+      background: #e5e5e7;
+      transform: scale(1.05);
+    }
+
+    .chip:active {
+      background: #d2d2d7;
+      transform: scale(0.98);
+    }
+
+    /* ================================================
+       CONFIDENCE SLIDER SECTION
+       ================================================ */
+    .confidence-section {
+      background: #f6f6f6;
+      border-radius: 16px;
+      padding: 32px;
+      margin: 32px 0;
+    }
+
+    .confidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .confidence-title {
+      font-size: 22px;
+      line-height: 1.36364;
+      font-weight: 600;
+      color: #1d1d1f;
+    }
+
+    .confidence-value {
+      font-size: 32px;
+      line-height: 1.125;
+      font-weight: 600;
+      color: #007AFF;
+      font-variant-numeric: tabular-nums; /* Align numbers */
+    }
+
+    /* Slider Styles */
+    .slider-container {
+      position: relative;
+      margin: 24px 0;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #d2d2d7;
+      outline: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    /* Slider thumb - WebKit browsers */
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #007AFF;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+      transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 16px rgba(0,122,255,0.4);
+    }
+
+    /* Slider thumb - Firefox */
+    .slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #007AFF;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 14px;
+      color: #86868b;
+      font-weight: 500;
+    }
+
+    .breakeven-btn {
+      background: none;
+      border: none;
+      color: #007AFF;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 0;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .breakeven-btn:hover {
+      opacity: 0.7;
+    }
+
+    /* ================================================
+       RESULTS CARD (STICKY BOTTOM)
+       ================================================ */
+    .results-card {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      /* Glassmorphism effect */
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0,0,0,0.1);
+      padding: 32px 22px calc(32px + env(safe-area-inset-bottom)); /* iPhone safe area */
+      transform: translateY(100%); /* Hidden by default */
+      transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+      z-index: 1000;
+    }
+
+    /* Show the results card */
+    .results-card.visible {
+      transform: translateY(0);
+    }
+
+    .results-content {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* ================================================
+       VERDICT DISPLAY
+       ================================================ */
+    .verdict {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .verdict-amount {
+      font-size: 48px;
+      line-height: 1.08333;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Verdict color states */
+    .verdict-amount.positive {
+      color: #34C759;           /* Apple green */
+    }
+
+    .verdict-amount.negative {
+      color: #FF3B30;           /* Apple red */
+    }
+
+    .verdict-amount.neutral {
+      color: #FF9500;           /* Apple orange */
+    }
+
+    .verdict-label {
+      font-size: 19px;
+      line-height: 1.26316;
+      font-weight: 500;
+      color: #86868b;
+    }
+
+    /* ================================================
+       METRICS GRID
+       ================================================ */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 24px;
+      text-align: center;
+    }
+
+    .metric {
+      background: #f6f6f6;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .metric-label {
+      font-size: 14px;
+      color: #86868b;
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ================================================
+       FOOTER NOTE
+       ================================================ */
+    .footnote {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #86868b;
+      font-weight: 400;
+      line-height: 1.42857;
+    }
+
+    /* ================================================
+       RESPONSIVE BREAKPOINTS
+       ================================================ */
+    
+    /* Tablet (iPad) */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 16px 0;
+      }
+
+      .hero h1 {
+        font-size: 40px;
+      }
+
+      .hero p {
+        font-size: 21px;
+      }
+
+      .main-card {
+        padding: 32px 24px;
+      }
+
+      .input-section {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .confidence-section {
+        padding: 24px;
+      }
+
+      .results-card {
+        padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+      }
+    }
+
+    /* Mobile (iPhone) */
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .hero p {
+        font-size: 19px;
+      }
+
+      .chips-container {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- ================================================
+       MAIN CONTAINER
+       ================================================ -->
+  <div class="container">
+    
+    <!-- HERO SECTION -->
+    <div class="hero">
+      <h1>Is this trade worth it?</h1>
+      <p>Type a few numbers. Get a go/no-go.</p>
+    </div>
+
+    <!-- MAIN INPUT CARD -->
+    <div class="main-card">
+      
+      <!-- INPUT GRID SECTION -->
+      <div class="input-section">
+        
+        <!-- ENTRY MARKET CAP INPUT -->
+        <div class="input-group">
+          <label class="input-label" for="entry">Entry Market Cap</label>
+          <input 
+            type="text" 
+            id="entry" 
+            class="input-field" 
+            placeholder="2.3M" 
+            autocomplete="off" 
+          />
+          <div class="input-hint">Where you'd buy</div>
+        </div>
+        
+        <!-- TARGET MARKET CAP INPUT -->
+        <div class="input-group">
+          <label class="input-label" for="target">Target Market Cap</label>
+          <input 
+            type="text" 
+            id="target" 
+            class="input-field" 
+            placeholder="10M" 
+            autocomplete="off" 
+          />
+          <div class="input-hint">Where you'd be happy to sell</div>
+        </div>
+
+        <!-- POSITION SIZE INPUT -->
+        <div class="input-group">
+          <label class="input-label" for="position">Position Size</label>
+          <input 
+            type="text" 
+            id="position" 
+            class="input-field" 
+            placeholder="2.5k" 
+            autocomplete="off" 
+          />
+          <div class="input-hint">How much you'd put in</div>
+        </div>
+        
+        <!-- MAX LOSS INPUT -->
+        <div class="input-group">
+          <label class="input-label" for="maxLoss">Max Loss</label>
+          <input 
+            type="number" 
+            id="maxLoss" 
+            class="input-field" 
+            placeholder="25" 
+            min="0" 
+            max="95" 
+          />
+          <div class="input-hint">What you're okay losing (% of position)</div>
+        </div>
+      </div>
+
+      <!-- MULTIPLIER CHIPS -->
+      <div class="chips-container">
+        <button class="chip" data-multiplier="2">×2</button>
+        <button class="chip" data-multiplier="5">×5</button>
+        <button class="chip" data-multiplier="10">×10</button>
+        <button class="chip" data-multiplier="50">×50</button>
+      </div>
+
+      <!-- CONFIDENCE SLIDER SECTION -->
+      <div class="confidence-section">
+        <div class="confidence-header">
+          <span class="confidence-title">Chance it reaches target</span>
+          <span class="confidence-value" id="confidence-display">20%</span>
+        </div>
+        
+        <div class="slider-container">
+          <input 
+            type="range" 
+            id="confidence" 
+            class="slider" 
+            min="5" 
+            max="50" 
+            value="20" 
+            step="1" 
+          />
+          <div class="slider-labels">
+            <span>😰 5%</span>
+            <span>25%</span>
+            <span>50% 🚀</span>
+          </div>
+        </div>
+        
+        <!-- BREAKEVEN BUTTON -->
+        <div style="text-align: center; margin-top: 16px;">
+          <button class="breakeven-btn" id="setBreakeven">Set to breakeven</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================
+       STICKY RESULTS CARD
+       ================================================ -->
+  <div class="results-card" id="resultsCard">
+    <div class="results-content">
+      
+      <!-- MAIN VERDICT -->
+      <div class="verdict">
+        <div class="verdict-amount" id="ev-amount">$0</div>
+        <div class="verdict-label" id="ev-label">Enter values above</div>
+      </div>
+      
+      <!-- METRICS GRID -->
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">EV %</div>
+          <div class="metric-value" id="ev-percent">0%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">R Multiple</div>
+          <div class="metric-value" id="r-multiple">0.0R</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Upside</div>
+          <div class="metric-value" id="upside">+$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Downside</div>
+          <div class="metric-value" id="downside">-$0</div>
+        </div>
+      </div>
+      
+      <!-- FOOTER NOTE -->
+      <div class="footnote">
+        This is first-principles math. EV guides repeated decisions, not single outcomes.
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================
+       JAVASCRIPT LOGIC
+       ================================================ -->
+  <script>
+    // ============================================
+    // UTILITY FUNCTIONS
+    // ============================================
+    
+    /**
+     * Quick element selector helper
+     */
+    const $ = id => document.getElementById(id);
+    
+    // ============================================
+    // DOM ELEMENT REFERENCES
+    // ============================================
+    
+    // Input elements
+    const entry = $('entry');           // Entry market cap input
+    const target = $('target');         // Target market cap input  
+    const position = $('position');     // Position size input
+    const maxLoss = $('maxLoss');       // Max loss percentage input
+    const confidence = $('confidence'); // Confidence slider
+    
+    // Display elements
+    const confidenceDisplay = $('confidence-display');  // Shows slider %
+    const setBreakevenBtn = $('setBreakeven');         // Breakeven button
+    const resultsCard = $('resultsCard');              // Bottom results card
+    
+    // Result value displays
+    const evAmount = $('ev-amount');       // Main EV dollar amount
+    const evLabel = $('ev-label');         // Verdict text
+    const evPercent = $('ev-percent');     // EV as percentage
+    const rMultiple = $('r-multiple');     // Risk/reward multiple
+    const upside = $('upside');            // Potential profit
+    const downside = $('downside');        // Potential loss
+
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    
+    let currentBreakeven = 0;  // Stores calculated breakeven probability
+
+    // ============================================
+    // PARSING & FORMATTING FUNCTIONS
+    // ============================================
+    
+    /**
+     * Parse shorthand number formats (2.3M, 500k, etc)
+     * @param {string} value - Input value to parse
+     * @returns {number} Parsed numeric value
+     */
+    function parseShorthand(value) {
+      if (!value) return 0;
+      
+      // Remove commas and convert to string
+      value = value.toString().replace(/,/g, '');
+      const upperValue = value.toUpperCase();
+      
+      // Check for shorthand suffixes
+      if (upperValue.endsWith('K')) {
+        return parseFloat(value) * 1000;
+      } else if (upperValue.endsWith('M')) {
+        return parseFloat(value) * 1000000;
+      } else if (upperValue.endsWith('B')) {
+        return parseFloat(value) * 1000000000;
+      }
+      
+      // Return plain number or 0 if invalid
+      return parseFloat(value) || 0;
+    }
+
+    /**
+     * Format numbers with appropriate precision and commas
+     * @param {number} value - Number to format
+     * @returns {string} Formatted number string
+     */
+    function formatNumber(value) {
+      const abs = Math.abs(value);
+      
+      if (abs >= 1000) {
+        // Large numbers: no decimals, add commas
+        return value.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      } else if (abs >= 100) {
+        // Medium numbers: no decimals
+        return value.toFixed(0);
+      } else if (abs >= 10) {
+        // Small numbers: 1 decimal
+        return value.toFixed(1);
+      } else {
+        // Tiny numbers: 2 decimals
+        return value.toFixed(2);
+      }
+    }
+
+    // ============================================
+    // MAIN CALCULATION ENGINE
+    // ============================================
+    
+    /**
+     * Main calculation function - runs on every input change
+     * Calculates EV, R-multiple, and updates all displays
+     */
+    function calculate() {
+      // Parse all input values
+      const entryMC = parseShorthand(entry.value);
+      const targetMC = parseShorthand(target.value);
+      const posSize = parseShorthand(position.value);
+      const maxLossPct = parseFloat(maxLoss.value) || 25;  // Default 25%
+      const conf = parseFloat(confidence.value) / 100;      // Convert to decimal
+
+      // Check if we have minimum required inputs
+      const hasMinimumInputs = entryMC > 0 && targetMC > 0 && posSize > 0;
+
+      if (!hasMinimumInputs) {
+        // Hide results card if inputs incomplete
+        resultsCard.classList.remove('visible');
+        evAmount.textContent = '$0';
+        evLabel.textContent = 'Enter values above';
+        evPercent.textContent = '0%';
+        rMultiple.textContent = '0.0R';
+        upside.textContent = '+$0';
+        downside.textContent = '-$0';
+        currentBreakeven = 0;
+        return;
+      }
+
+      // Show results card when we have inputs
+      resultsCard.classList.add('visible');
+
+      // ============================================
+      // CORE CALCULATIONS
+      // ============================================
+      
+      // Calculate upside/downside
+      const multiple = targetMC / entryMC;
+      const upsideAmount = posSize * Math.max(0, multiple - 1);
+      const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
+      
+      // Calculate R-multiple (risk/reward ratio)
+      const R = downsideAmount > 0 ? (upsideAmount / downsideAmount) : 0;
+      
+      // Calculate expected value
+      const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
+      const evPct = posSize > 0 ? (ev / posSize) : 0;
+
+      // Calculate breakeven probability
+      currentBreakeven = (upsideAmount + downsideAmount) > 0 ? 
+        downsideAmount / (upsideAmount + downsideAmount) : 0;
+
+      // ============================================
+      // DETERMINE VERDICT
+      // ============================================
+      
+      let verdictClass, verdictText;
+      
+      if (ev > 0 && R >= 2) {
+        // Good trade: positive EV and good R
+        verdictClass = 'positive';
+        verdictText = 'Numbers align. Positive EV and R ≥ 2.';
+      } else if (Math.abs(evPct) <= 0.01 || (R >= 1.5 && R < 2)) {
+        // Borderline trade: close to breakeven or decent R
+        verdictClass = 'neutral';
+        verdictText = 'Close call. Consider improving R or reducing risk.';
+      } else {
+        // Bad trade: negative EV or poor R
+        verdictClass = 'negative';
+        verdictText = "Math doesn't support it. Reduce loss or raise target.";
+      }
+
+      // ============================================
+      // UPDATE DISPLAY
+      // ============================================
+      
+      // Main verdict
+      evAmount.textContent = `${ev >= 0 ? '+' : ''}$${formatNumber(ev)}`;
+      evAmount.className = `verdict-amount ${verdictClass}`;
+      evLabel.textContent = verdictText;
+      
+      // Metrics with appropriate coloring
+      evPercent.textContent = `${(evPct * 100).toFixed(1)}%`;
+      evPercent.style.color = ev >= 0 ? '#34C759' : '#FF3B30';
+      
+      rMultiple.textContent = `${R.toFixed(1)}R`;
+      rMultiple.style.color = R >= 2 ? '#34C759' : R >= 1.5 ? '#FF9500' : '#FF3B30';
+      
+      upside.textContent = `+$${formatNumber(upsideAmount)}`;
+      upside.style.color = '#34C759';
+      
+      downside.textContent = `-$${formatNumber(downsideAmount)}`;
+      downside.style.color = '#FF3B30';
+    }
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    
+    /**
+     * Update confidence display when slider moves
+     */
+    confidence.addEventListener('input', (e) => {
+      confidenceDisplay.textContent = e.target.value + '%';
+      calculate();  // Recalculate on slider change
+    });
+
+    /**
+     * Recalculate on any input change
+     * Also add select-all behavior on focus
+     */
+    [entry, target, position, maxLoss].forEach(input => {
+      input.addEventListener('input', calculate);
+      input.addEventListener('focus', () => {
+        setTimeout(() => input.select(), 0);  // Select all text on focus
+      });
+    });
+
+    /**
+     * Multiplier chip click handlers
+     * Multiply entry MC by chip value to set target
+     */
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const multiplier = parseFloat(chip.dataset.multiplier);
+        const entryMC = parseShorthand(entry.value);
+        
+        if (entryMC > 0) {
+          const targetMC = entryMC * multiplier;
+          
+          // Format target with appropriate suffix
+          if (targetMC >= 1000000) {
+            target.value = (targetMC / 1000000).toFixed(1).replace('.0', '') + 'M';
+          } else if (targetMC >= 1000) {
+            target.value = (targetMC / 1000).toFixed(0) + 'k';
+          } else {
+            target.value = targetMC.toString();
+          }
+          
+          calculate();  // Update calculations
+        }
+      });
+    });
+
+    /**
+     * Set confidence to breakeven probability
+     */
+    setBreakevenBtn.addEventListener('click', () => {
+      if (currentBreakeven > 0) {
+        const breakevenPct = Math.round(currentBreakeven * 100);
+        // Clamp between slider min/max (5-50%)
+        confidence.value = Math.min(50, Math.max(5, breakevenPct));
+        confidenceDisplay.textContent = confidence.value + '%';
+        calculate();  // Recalculate with new confidence
+      }
+    });
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    
+    // Run initial calculation to set default state
+    calculate();
+  </script>
+</body>
+</html>
