@@ -953,9 +953,10 @@
     // Track previous EV for crossing detection
     let previousEV = 0;
 
-    // Update confidence display
+    // Update confidence display and calculate
     confidence.addEventListener('input', (e) => {
       confidenceDisplay.textContent = e.target.value + '%';
+      calculate();
     });
     
     // Details toggle functionality

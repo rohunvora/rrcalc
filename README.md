@@ -12,7 +12,8 @@ A minimal, mobile-first tool for evaluating cryptocurrency trades through expect
 
 ## Files
 
-- `ev_ive.html` - Main calculator (production version)
+- `ev_apple.html` - **NEW** Apple-inspired design with light theme and working slider
+- `ev_ive.html` - Dark theme calculator (fixed, now functional)
 - `ev.html` - Alternative simpler version
 - `starter.html` - Original complex version with ladder strategy
 - `ZONES.md` - Development documentation and zone structure
