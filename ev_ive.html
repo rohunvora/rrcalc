@@ -55,7 +55,7 @@
       width: 100%;
       max-width: 428px;
       margin: 0 auto;
-      padding: 24px 20px;
+      padding: 24px 20px 200px 20px; /* Extra bottom padding for sticky card */
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -143,7 +143,7 @@
       color: var(--white);
       font-weight: 400;
       outline: none;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.12s ease;
       -webkit-appearance: none;
       font-variant-numeric: tabular-nums;
     }
@@ -252,36 +252,95 @@
       font-style: italic;
     }
 
-    .results {
-      background: var(--gray-900);
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 24px;
+    .sticky-card {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, var(--panel), var(--panel2));
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px calc(24px + var(--safe-area-inset-bottom));
+      max-width: 428px;
+      margin: 0 auto;
+      box-shadow: 0 -8px 32px rgba(0,0,0,0.3);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
     }
 
-    .result-row {
+    .sticky-card.visible {
+      transform: translateY(0);
+    }
+
+    .sticky-card.allowed {
+      border-color: rgba(0,200,81,0.3);
+      background: linear-gradient(180deg, 
+        rgba(0,200,81,0.08), 
+        rgba(16,24,20,0.95));
+    }
+
+    .sticky-card.borderline {
+      border-color: rgba(255,171,0,0.3);
+      background: linear-gradient(180deg, 
+        rgba(255,171,0,0.08), 
+        rgba(24,20,16,0.95));
+    }
+
+    .sticky-card.fold {
+      border-color: rgba(255,59,48,0.3);
+      background: linear-gradient(180deg, 
+        rgba(255,59,48,0.08), 
+        rgba(24,16,16,0.95));
+    }
+
+    .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
+      margin-bottom: 16px;
     }
 
-    .result-row:not(:last-child) {
-      border-bottom: 1px solid var(--gray-800);
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--white);
+    }
+
+    .card-toggle {
+      background: none;
+      border: none;
+      color: var(--gray-400);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .result-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .result-item {
+      text-align: center;
     }
 
     .result-label {
-      font-size: 15px;
-      color: var(--gray-400);
-      letter-spacing: -0.01em;
+      font-size: 12px;
+      color: var(--gray-500);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .result-value {
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: 0.008em;
+      font-size: 18px;
+      font-weight: 700;
       font-variant-numeric: tabular-nums;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.12s ease;
     }
 
     .result-value.positive {
@@ -292,45 +351,55 @@
       color: var(--red);
     }
 
-    .break-even {
-      background: var(--gray-800);
-      border-radius: 12px;
-      padding: 16px;
-      margin: 20px 0;
+    .details {
+      border-top: 1px solid var(--gray-800);
+      padding-top: 16px;
+      margin-top: 16px;
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .details.expanded {
+      opacity: 1;
+      max-height: 200px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .detail-label {
+      color: var(--gray-400);
+    }
+
+    .detail-value {
+      color: var(--gray-200);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .main-verdict {
       text-align: center;
+      margin-bottom: 16px;
     }
 
-    .break-even-label {
-      font-size: 13px;
-      color: var(--gray-500);
-      margin-bottom: 4px;
-    }
-
-    .break-even-value {
-      font-size: 20px;
-      font-weight: 600;
-      color: var(--gray-300);
-    }
-
-    .verdict {
-      background: var(--gray-900);
-      border-radius: 20px;
-      padding: 32px 24px;
-      text-align: center;
-      margin-top: auto;
-      margin-bottom: 24px;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border: 2px solid var(--gray-900);
-      transform: scale(1);
-    }
-
-    .verdict.positive {
+    .verdict.allowed {
       background: linear-gradient(135deg, rgba(0,200,81,0.1), rgba(0,200,81,0.05));
       border-color: rgba(0,200,81,0.3);
       animation: pulsePositive 2s ease-in-out infinite;
     }
 
-    .verdict.negative {
+    .verdict.borderline {
+      background: linear-gradient(135deg, rgba(255,171,0,0.1), rgba(255,171,0,0.05));
+      border-color: rgba(255,171,0,0.3);
+    }
+
+    .verdict.fold {
       background: linear-gradient(135deg, rgba(255,59,48,0.1), rgba(255,59,48,0.05));
       border-color: rgba(255,59,48,0.3);
     }
@@ -340,21 +409,20 @@
       50% { transform: scale(1.02); }
     }
 
-    .ev-amount {
-      font-size: 42px;
+    .verdict-amount {
+      font-size: 32px;
       font-weight: 700;
       letter-spacing: 0.009em;
-      margin-bottom: 8px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-bottom: 6px;
+      transition: all 0.12s ease;
       font-variant-numeric: tabular-nums;
-      will-change: transform;
     }
 
-    .ev-label {
-      font-size: 17px;
-      font-weight: 600;
-      letter-spacing: -0.022em;
-      opacity: 0.8;
+    .verdict-label {
+      font-size: 16px;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+      color: var(--gray-300);
     }
 
     .action-buttons {
@@ -372,7 +440,7 @@
       letter-spacing: -0.022em;
       border: none;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.12s ease;
       outline: none;
       -webkit-tap-highlight-color: transparent;
       position: relative;
@@ -576,26 +644,48 @@
       </div>
     </div>
 
-    <div class="results">
-      <div class="result-row">
-        <span class="result-label">Upside if correct</span>
-        <span class="result-value positive" id="upside">+$0</span>
+    <!-- Sticky Results Card -->
+    <div class="sticky-card" id="resultsCard">
+      <div class="card-header">
+        <div class="card-title">Decision</div>
+        <button class="card-toggle" id="detailsToggle">Why?</button>
       </div>
-      <div class="result-row">
-        <span class="result-label">Downside if wrong</span>
-        <span class="result-value negative" id="downside">-$0</span>
+      
+      <div class="main-verdict">
+        <div class="verdict-amount" id="ev-amount">$0</div>
+        <div class="verdict-label" id="ev-label">Enter values above</div>
       </div>
-      <div class="break-even">
-        <div class="break-even-label">Break-even probability</div>
-        <div class="break-even-value" id="breakeven">0%</div>
+      
+      <div class="result-summary">
+        <div class="result-item">
+          <div class="result-label">EV %</div>
+          <div class="result-value" id="ev-percent">0%</div>
+        </div>
+        <div class="result-item">
+          <div class="result-label">R Multiple</div>
+          <div class="result-value" id="r-multiple">0.0R</div>
+        </div>
+      </div>
+      
+      <div class="details" id="details">
+        <div class="detail-row">
+          <span class="detail-label">Upside if correct</span>
+          <span class="detail-value" id="upside">+$0</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Downside if wrong</span>
+          <span class="detail-value" id="downside">-$0</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Break-even probability</span>
+          <span class="detail-value" id="breakeven">0%</span>
+        </div>
+      </div>
+      
+      <div style="text-align: center; font-size: 11px; color: var(--gray-600); margin-top: 16px; line-height: 1.4;">
+        This is first-principles math. EV/Kelly guide repeated decisions, not single outcomes.
       </div>
     </div>
-
-    <div class="verdict" id="verdict">
-      <div class="ev-amount" id="ev-amount">$0</div>
-      <div class="ev-label" id="ev-label">Enter values above</div>
-    </div>
-
 
     <div class="history" id="history">
       <span id="history-text"></span>
@@ -615,9 +705,13 @@
     const upside = $('upside');
     const downside = $('downside');
     const breakeven = $('breakeven');
-    const verdict = $('verdict');
+    const resultsCard = $('resultsCard');
     const evAmount = $('ev-amount');
     const evLabel = $('ev-label');
+    const evPercent = $('ev-percent');
+    const rMultiple = $('r-multiple');
+    const detailsToggle = $('detailsToggle');
+    const details = $('details');
     const setBreakevenBtn = $('setBreakeven');
     const history = $('history');
     const historyText = $('history-text');
@@ -725,16 +819,33 @@
       const slippagePct = Math.min(50, Math.max(0, parseFloat(slippage.value) || 0)) / 100;
       const conf = parseFloat(confidence.value) / 100;
 
-      if (entryMC <= 0 || targetMC <= 0 || posSize <= 0) {
+      // Check for invalid target vs entry
+      if (entryMC > 0 && targetMC > 0 && targetMC <= entryMC) {
+        evLabel.textContent = 'No upside from target—EV will be dominated by loss.';
+        evAmount.style.color = 'var(--amber)';
+        resultsCard.classList.remove('visible');
+        return;
+      }
+      
+      // Check if we have minimum required inputs
+      const hasMinimumInputs = entryMC > 0 && targetMC > 0 && posSize > 0 && maxLossPct > 0;
+      
+      if (!hasMinimumInputs) {
+        // Hide results card if insufficient inputs
+        resultsCard.classList.remove('visible');
         evAmount.textContent = '$0';
         evLabel.textContent = 'Enter values above';
         upside.textContent = '+$0';
         downside.textContent = '-$0';
         breakeven.textContent = '0%';
-        verdict.className = 'verdict';
+        evPercent.textContent = '0%';
+        rMultiple.textContent = '0.0R';
         currentBreakeven = 0;
         return;
       }
+      
+      // Show results card when we have minimum inputs
+      resultsCard.classList.add('visible');
 
       // Calculate multiples
       const multiple = targetMC / entryMC;
@@ -765,29 +876,58 @@
       downside.textContent = `-$${formatSOL(downsideAmount)}`;
       breakeven.textContent = `${(breakevenProb * 100).toFixed(0)}%`;
 
-      // Update verdict with both EV and R requirements
-      const isAllowed = ev > 0 && R >= 2;
-      const wasPositive = verdict.classList.contains('positive');
+      // Calculate EV as percentage of position
+      const evPct = posSize > 0 ? Math.abs(ev / posSize) : 0;
       
-      if (isAllowed !== wasPositive) {
-        verdict.style.transform = 'scale(0.98)';
+      // Three-state verdict logic
+      let verdictState, verdictMessage, verdictColor;
+      
+      if (ev > 0 && R >= 2) {
+        // Allowed: EV > 0 AND R ≥ 2
+        verdictState = 'allowed';
+        verdictMessage = `✓ Allowed`;
+        verdictColor = 'var(--green)';
+      } else if (evPct <= 0.01 || (R >= 1.5 && R < 2)) {
+        // Borderline: |EV%| ≤ 1% OR 1.5 ≤ R < 2
+        verdictState = 'borderline';
+        verdictMessage = '⚡ Borderline';
+        verdictColor = 'var(--amber)';
+      } else {
+        // Fold: Otherwise
+        verdictState = 'fold';
+        verdictMessage = '✗ Fold';
+        verdictColor = 'var(--red)';
+      }
+      
+      // Check for state change animation
+      const currentClass = resultsCard.dataset.state;
+      if (currentClass !== verdictState) {
+        resultsCard.style.transform = 'translateY(0) scale(0.98)';
         setTimeout(() => {
-          verdict.style.transform = 'scale(1)';
+          resultsCard.style.transform = 'translateY(0) scale(1)';
         }, 100);
       }
       
-      verdict.className = isAllowed ? 'verdict positive' : 'verdict negative';
+      // Update verdict display
+      resultsCard.dataset.state = verdictState;
+      resultsCard.className = `sticky-card visible ${verdictState}`;
       evAmount.textContent = `${ev >= 0 ? '+' : ''}$${formatSOL(ev)}`;
-      if (isAllowed) {
-        evLabel.textContent = `✓ Allowed (${R.toFixed(1)}R)`;
-      } else if (ev <= 0 && R < 2) {
-        evLabel.textContent = '✗ Fold (Bad EV & Low R)';
-      } else if (ev <= 0) {
-        evLabel.textContent = '✗ Fold (Negative EV)';
+      evAmount.style.color = verdictColor;
+      
+      // Update summary metrics
+      evPercent.textContent = `${(evPct * 100).toFixed(1)}%`;
+      evPercent.style.color = ev >= 0 ? 'var(--green)' : 'var(--red)';
+      rMultiple.textContent = `${R.toFixed(1)}R`;
+      rMultiple.style.color = R >= 2 ? 'var(--green)' : R >= 1.5 ? 'var(--amber)' : 'var(--red)';
+      
+      // Set explanatory message
+      if (verdictState === 'allowed') {
+        evLabel.textContent = 'Numbers align. Positive EV and R ≥ 2.';
+      } else if (verdictState === 'borderline') {
+        evLabel.textContent = 'Close call. Consider improving R or reducing risk.';
       } else {
-        evLabel.textContent = `✗ Fold (R=${R.toFixed(1)} < 2)`;
+        evLabel.textContent = 'Math doesn't support it. Reduce loss or raise target.';
       }
-      evAmount.style.color = isAllowed ? 'var(--green)' : 'var(--red)';
 
       // Micro animation on value change
       if (oldEV !== evAmount.textContent) {
@@ -833,9 +973,23 @@
         const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
         const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
         
-        // Vibrate when crossing zero EV
+        // Vibrate when crossing verdict boundaries
         if ('vibrate' in navigator) {
-          if ((previousEV <= 0 && ev > 0) || (previousEV >= 0 && ev < 0)) {
+          // Calculate EV percentage for borderline detection
+          const evPct = posSize > 0 ? Math.abs(ev / posSize) : 0;
+          const prevEvPct = posSize > 0 ? Math.abs(previousEV / posSize) : 0;
+          
+          // Determine verdict states
+          const getVerdictState = (ev, R, evPct) => {
+            if (ev > 0 && R >= 2) return 'allowed';
+            if (evPct <= 0.01 || (R >= 1.5 && R < 2)) return 'borderline';
+            return 'fold';
+          };
+          
+          const currentState = getVerdictState(ev, upsideAmount/downsideAmount, evPct);
+          const prevState = getVerdictState(previousEV, upsideAmount/downsideAmount, prevEvPct);
+          
+          if (currentState !== prevState) {
             navigator.vibrate(20);
           } else if (value == 10 || value == 20 || value == 30) {
             navigator.vibrate(10);
@@ -846,6 +1000,13 @@
       }
       
       calculate();
+    });
+    
+    // Details toggle functionality
+    detailsToggle.addEventListener('click', () => {
+      const isExpanded = details.classList.contains('expanded');
+      details.classList.toggle('expanded');
+      detailsToggle.textContent = isExpanded ? 'Why?' : 'Hide';
     });
 
     // Handle market cap inputs with smart formatting
@@ -878,7 +1039,7 @@
         
         // Calculate after brief delay
         clearTimeout(calculateTimeout);
-        calculateTimeout = setTimeout(calculate, 50);
+        calculateTimeout = setTimeout(calculate, 120);
       });
       
       // Format on blur for cleaner display
@@ -911,18 +1072,31 @@
     handleMarketCapInput(target, 'target-preview');
     handleMarketCapInput(position, 'position-preview');
     
+    // Add select-all on focus for remaining inputs
+    [maxLoss, slippage, confidence].forEach(input => {
+      input.addEventListener('focus', () => {
+        setTimeout(() => input.select(), 0);
+      });
+    });
+    
     // Calculate on position, maxLoss and slippage inputs
     let calculateTimeout;
     [position, maxLoss, slippage].forEach(input => {
       input.addEventListener('input', () => {
         clearTimeout(calculateTimeout);
-        calculateTimeout = setTimeout(calculate, 50);
+        calculateTimeout = setTimeout(calculate, 120);
       });
     });
     
     // Add multiplier chip functionality
     document.querySelectorAll('.chip').forEach(chip => {
       chip.addEventListener('click', () => {
+        // Tap animation
+        chip.style.transform = 'scale(0.98)';
+        setTimeout(() => {
+          chip.style.transform = 'scale(1)';
+        }, 120);
+        
         const multiplier = parseFloat(chip.dataset.multiplier);
         const entryMC = parseShorthand(entry.value);
         if (entryMC > 0) {
@@ -941,12 +1115,12 @@
         confidenceDisplay.textContent = confidence.value + '%';
         
         // Animate the confidence display
-        confidenceDisplay.style.transform = 'scale(1.2)';
+        confidenceDisplay.style.transform = 'scale(1.15)';
         confidenceDisplay.style.color = 'var(--amber)';
         setTimeout(() => {
           confidenceDisplay.style.transform = 'scale(1)';
           confidenceDisplay.style.color = '';
-        }, 300);
+        }, 120);
         
         calculate();
       }
@@ -1017,7 +1191,7 @@
       font-size: 13px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.12s ease;
     }
     
     .chip:hover {
