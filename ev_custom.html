@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Trade Calculator</title>
+  <style>
+    /* ================================================
+       COLOR SYSTEM - Custom Purple Theme
+       ================================================ */
+    :root {
+      /* Primary Colors */
+      --primary: #6A60E8;
+      --primary-hover: #7971E5;
+      
+      /* Backgrounds */
+      --background: #1A1C24;
+      --background-secondary: #1C1D25;
+      --background-tertiary: #191A24;
+      
+      /* Text Colors */
+      --text-primary: #F3F3F4;
+      --text-secondary: #8D93B7;
+      --text-tertiary: #8D93B7;
+      
+      /* Semantic Colors */
+      --green: #4FEEE4;
+      --red: #F04B92;
+      --amber: #E7B587;
+      
+      /* UI Elements */
+      --stroke: #303038;
+      --stroke-secondary: #303038;
+      --border-subtle: #303038;
+      
+      /* Charts (for future use) */
+      --chart-up: #ffffff;
+      --chart-down: #a6a0a0;
+      
+      /* Gradients */
+      --gradient-primary: linear-gradient(135deg, #6A60E8, #7971E5);
+      --gradient-rainbow: linear-gradient(90deg, #6A60E8, #F04B92, #E7B587, #4FEEE4, #7CDDFF, #6A60E8);
+    }
+
+    /* ================================================
+       RESET & BASE
+       ================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      font-size: 17px;
+      line-height: 1.47059;
+      font-weight: 400;
+      letter-spacing: -0.022em;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background: var(--background);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding-bottom: 200px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ================================================
+       LAYOUT
+       ================================================ */
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 60px 22px 0;
+    }
+
+    /* ================================================
+       HERO
+       ================================================ */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      line-height: 1.07143;
+      font-weight: 600;
+      letter-spacing: -0.005em;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      font-size: 28px;
+      line-height: 1.14286;
+      font-weight: 400;
+      letter-spacing: .007em;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+
+    /* ================================================
+       MAIN CARD
+       ================================================ */
+    .main-card {
+      background: var(--background-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 18px;
+      padding: 48px;
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Accent line */
+    .main-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-rainbow);
+      opacity: 0.8;
+    }
+
+    /* ================================================
+       INPUTS
+       ================================================ */
+    .input-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .input-group {
+      position: relative;
+    }
+
+    .input-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .input-label {
+      display: block;
+      font-size: 17px;
+      line-height: 1.47059;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .input-field {
+      width: 100%;
+      height: 56px;
+      background: var(--background-tertiary);
+      border: 2px solid var(--stroke);
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 17px;
+      line-height: 1.47059;
+      color: var(--text-primary);
+      transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+      outline: none;
+      font-weight: 400;
+    }
+
+    .input-field:focus {
+      background: var(--background-tertiary);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(106, 96, 232, 0.15);
+    }
+
+    .input-field::placeholder {
+      color: var(--text-tertiary);
+      font-weight: 400;
+    }
+
+    .input-hint {
+      font-size: 14px;
+      line-height: 1.42857;
+      color: var(--text-secondary);
+      margin-top: 6px;
+      font-weight: 400;
+    }
+
+    /* ================================================
+       CHIPS
+       ================================================ */
+    .chips-container {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .chip {
+      background: var(--background-tertiary);
+      border: 2px solid var(--stroke);
+      border-radius: 20px;
+      padding: 8px 16px;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+      min-height: 44px;
+      min-width: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chip:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      transform: scale(1.05);
+    }
+
+    .chip:active {
+      transform: scale(0.98);
+    }
+
+    /* ================================================
+       CONFIDENCE SLIDER
+       ================================================ */
+    .confidence-section {
+      background: var(--background-tertiary);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      padding: 32px;
+      margin: 32px 0;
+    }
+
+    .confidence-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .confidence-title {
+      font-size: 22px;
+      line-height: 1.36364;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .confidence-value {
+      font-size: 32px;
+      line-height: 1.125;
+      font-weight: 600;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slider-container {
+      position: relative;
+      margin: 24px 0;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--stroke);
+      outline: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(106, 96, 232, 0.3);
+      transition: all 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 4px 16px rgba(106, 96, 232, 0.5);
+    }
+
+    .slider::-moz-range-thumb {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--primary);
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 8px rgba(106, 96, 232, 0.3);
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .breakeven-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 0;
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .breakeven-btn:hover {
+      opacity: 0.7;
+    }
+
+    /* ================================================
+       RESULTS CARD
+       ================================================ */
+    .results-card {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(28, 29, 37, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--stroke);
+      padding: 32px 22px calc(32px + env(safe-area-inset-bottom));
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+      z-index: 1000;
+    }
+
+    .results-card.visible {
+      transform: translateY(0);
+    }
+
+    .results-content {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* ================================================
+       VERDICT
+       ================================================ */
+    .verdict {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .verdict-amount {
+      font-size: 48px;
+      line-height: 1.08333;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .verdict-amount.positive {
+      color: var(--green);
+    }
+
+    .verdict-amount.negative {
+      color: var(--red);
+    }
+
+    .verdict-amount.neutral {
+      color: var(--amber);
+    }
+
+    .verdict-label {
+      font-size: 19px;
+      line-height: 1.26316;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    /* ================================================
+       METRICS
+       ================================================ */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 24px;
+      text-align: center;
+    }
+
+    .metric {
+      background: var(--background-tertiary);
+      border: 1px solid var(--stroke);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .metric-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 24px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-primary);
+    }
+
+    .footnote {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: var(--text-tertiary);
+      font-weight: 400;
+      line-height: 1.42857;
+    }
+
+    /* ================================================
+       RESPONSIVE
+       ================================================ */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 16px 0;
+      }
+
+      .hero h1 {
+        font-size: 40px;
+      }
+
+      .hero p {
+        font-size: 21px;
+      }
+
+      .main-card {
+        padding: 32px 24px;
+      }
+
+      .input-section {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+
+      .confidence-section {
+        padding: 24px;
+      }
+
+      .results-card {
+        padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .hero p {
+        font-size: 19px;
+      }
+
+      .chips-container {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Is this trade worth it?</h1>
+      <p>Type a few numbers. Get a go/no-go.</p>
+    </div>
+
+    <div class="main-card">
+      <div class="input-section">
+        <div class="input-group">
+          <label class="input-label" for="entry">Entry Market Cap</label>
+          <input type="text" id="entry" class="input-field" placeholder="2.3M" autocomplete="off" />
+          <div class="input-hint">Where you'd buy</div>
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="target">Target Market Cap</label>
+          <input type="text" id="target" class="input-field" placeholder="10M" autocomplete="off" />
+          <div class="input-hint">Where you'd be happy to sell</div>
+        </div>
+
+        <div class="input-group">
+          <label class="input-label" for="position">Position Size</label>
+          <input type="text" id="position" class="input-field" placeholder="2.5k" autocomplete="off" />
+          <div class="input-hint">How much you'd put in</div>
+        </div>
+        
+        <div class="input-group">
+          <label class="input-label" for="maxLoss">Max Loss</label>
+          <input type="number" id="maxLoss" class="input-field" placeholder="25" min="0" max="95" />
+          <div class="input-hint">What you're okay losing (% of position)</div>
+        </div>
+      </div>
+
+      <div class="chips-container">
+        <button class="chip" data-multiplier="2">×2</button>
+        <button class="chip" data-multiplier="5">×5</button>
+        <button class="chip" data-multiplier="10">×10</button>
+        <button class="chip" data-multiplier="50">×50</button>
+      </div>
+
+      <div class="confidence-section">
+        <div class="confidence-header">
+          <span class="confidence-title">Chance it reaches target</span>
+          <span class="confidence-value" id="confidence-display">20%</span>
+        </div>
+        
+        <div class="slider-container">
+          <input type="range" id="confidence" class="slider" min="5" max="50" value="20" step="1" />
+          <div class="slider-labels">
+            <span>😰 5%</span>
+            <span>25%</span>
+            <span>50% 🚀</span>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 16px;">
+          <button class="breakeven-btn" id="setBreakeven">Set to breakeven</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-card" id="resultsCard">
+    <div class="results-content">
+      <div class="verdict">
+        <div class="verdict-amount" id="ev-amount">$0</div>
+        <div class="verdict-label" id="ev-label">Enter values above</div>
+      </div>
+      
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">EV %</div>
+          <div class="metric-value" id="ev-percent">0%</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">R Multiple</div>
+          <div class="metric-value" id="r-multiple">0.0R</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Upside</div>
+          <div class="metric-value" id="upside">+$0</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Downside</div>
+          <div class="metric-value" id="downside">-$0</div>
+        </div>
+      </div>
+      
+      <div class="footnote">
+        This is first-principles math. EV guides repeated decisions, not single outcomes.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Utility
+    const $ = id => document.getElementById(id);
+    
+    // DOM elements
+    const entry = $('entry');
+    const target = $('target');
+    const position = $('position');
+    const maxLoss = $('maxLoss');
+    const confidence = $('confidence');
+    const confidenceDisplay = $('confidence-display');
+    const setBreakevenBtn = $('setBreakeven');
+    const resultsCard = $('resultsCard');
+    const evAmount = $('ev-amount');
+    const evLabel = $('ev-label');
+    const evPercent = $('ev-percent');
+    const rMultiple = $('r-multiple');
+    const upside = $('upside');
+    const downside = $('downside');
+
+    let currentBreakeven = 0;
+
+    // Parse shorthand (2.3M, 500k, etc)
+    function parseShorthand(value) {
+      if (!value) return 0;
+      value = value.toString().replace(/,/g, '');
+      const upperValue = value.toUpperCase();
+      if (upperValue.endsWith('K')) {
+        return parseFloat(value) * 1000;
+      } else if (upperValue.endsWith('M')) {
+        return parseFloat(value) * 1000000;
+      } else if (upperValue.endsWith('B')) {
+        return parseFloat(value) * 1000000000;
+      }
+      return parseFloat(value) || 0;
+    }
+
+    // Format numbers for display
+    function formatNumber(value) {
+      const abs = Math.abs(value);
+      if (abs >= 1000) {
+        return value.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      } else if (abs >= 100) {
+        return value.toFixed(0);
+      } else if (abs >= 10) {
+        return value.toFixed(1);
+      } else {
+        return value.toFixed(2);
+      }
+    }
+
+    // Main calculation
+    function calculate() {
+      const entryMC = parseShorthand(entry.value);
+      const targetMC = parseShorthand(target.value);
+      const posSize = parseShorthand(position.value);
+      const maxLossPct = parseFloat(maxLoss.value) || 25;
+      const conf = parseFloat(confidence.value) / 100;
+
+      const hasMinimumInputs = entryMC > 0 && targetMC > 0 && posSize > 0;
+
+      if (!hasMinimumInputs) {
+        resultsCard.classList.remove('visible');
+        evAmount.textContent = '$0';
+        evLabel.textContent = 'Enter values above';
+        evPercent.textContent = '0%';
+        rMultiple.textContent = '0.0R';
+        upside.textContent = '+$0';
+        downside.textContent = '-$0';
+        currentBreakeven = 0;
+        return;
+      }
+
+      resultsCard.classList.add('visible');
+
+      // Core calculations
+      const multiple = targetMC / entryMC;
+      const upsideAmount = posSize * Math.max(0, multiple - 1);
+      const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
+      const R = downsideAmount > 0 ? (upsideAmount / downsideAmount) : 0;
+      const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
+      const evPct = posSize > 0 ? (ev / posSize) : 0;
+
+      currentBreakeven = (upsideAmount + downsideAmount) > 0 ? 
+        downsideAmount / (upsideAmount + downsideAmount) : 0;
+
+      // Determine verdict
+      let verdictClass, verdictText;
+      if (ev > 0 && R >= 2) {
+        verdictClass = 'positive';
+        verdictText = 'Numbers align. Positive EV and R ≥ 2.';
+      } else if (Math.abs(evPct) <= 0.01 || (R >= 1.5 && R < 2)) {
+        verdictClass = 'neutral';
+        verdictText = 'Close call. Consider improving R or reducing risk.';
+      } else {
+        verdictClass = 'negative';
+        verdictText = "Math doesn't support it. Reduce loss or raise target.";
+      }
+
+      // Update display
+      evAmount.textContent = `${ev >= 0 ? '+' : ''}$${formatNumber(ev)}`;
+      evAmount.className = `verdict-amount ${verdictClass}`;
+      evLabel.textContent = verdictText;
+      
+      evPercent.textContent = `${(evPct * 100).toFixed(1)}%`;
+      evPercent.style.color = ev >= 0 ? 'var(--green)' : 'var(--red)';
+      
+      rMultiple.textContent = `${R.toFixed(1)}R`;
+      rMultiple.style.color = R >= 2 ? 'var(--green)' : R >= 1.5 ? 'var(--amber)' : 'var(--red)';
+      
+      upside.textContent = `+$${formatNumber(upsideAmount)}`;
+      upside.style.color = 'var(--green)';
+      
+      downside.textContent = `-$${formatNumber(downsideAmount)}`;
+      downside.style.color = 'var(--red)';
+    }
+
+    // Event listeners
+    confidence.addEventListener('input', (e) => {
+      confidenceDisplay.textContent = e.target.value + '%';
+      calculate();
+    });
+
+    [entry, target, position, maxLoss].forEach(input => {
+      input.addEventListener('input', calculate);
+      input.addEventListener('focus', () => {
+        setTimeout(() => input.select(), 0);
+      });
+    });
+
+    // Multiplier chips
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const multiplier = parseFloat(chip.dataset.multiplier);
+        const entryMC = parseShorthand(entry.value);
+        if (entryMC > 0) {
+          const targetMC = entryMC * multiplier;
+          if (targetMC >= 1000000) {
+            target.value = (targetMC / 1000000).toFixed(1).replace('.0', '') + 'M';
+          } else if (targetMC >= 1000) {
+            target.value = (targetMC / 1000).toFixed(0) + 'k';
+          } else {
+            target.value = targetMC.toString();
+          }
+          calculate();
+        }
+      });
+    });
+
+    // Set to breakeven
+    setBreakevenBtn.addEventListener('click', () => {
+      if (currentBreakeven > 0) {
+        const breakevenPct = Math.round(currentBreakeven * 100);
+        confidence.value = Math.min(50, Math.max(5, breakevenPct));
+        confidenceDisplay.textContent = confidence.value + '%';
+        calculate();
+      }
+    });
+
+    // Initialize
+    calculate();
+  </script>
+</body>
+</html>
