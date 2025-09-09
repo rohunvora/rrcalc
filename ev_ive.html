@@ -818,15 +818,12 @@
 
     // Calculate EV
     function calculate() {
-      console.log('Calculate called');
       const entryMC = parseShorthand(entry.value);
       const targetMC = parseShorthand(target.value);
       const posSize = parseShorthand(position.value); // Now accepts USD shorthand
       const maxLossPct = parseFloat(maxLoss.value) || 25; // Default 25%
       const slippagePct = Math.min(50, Math.max(0, parseFloat(slippage.value) || 0)) / 100;
       const conf = parseFloat(confidence.value) / 100;
-      
-      console.log('Inputs:', { entryMC, targetMC, posSize, maxLossPct, slippagePct, conf });
 
       // Check for invalid target vs entry
       if (entryMC > 0 && targetMC > 0 && targetMC <= entryMC) {
@@ -837,12 +834,10 @@
       }
       
       // Check if we have minimum required inputs
-      const hasMinimumInputs = entryMC > 0 && targetMC > 0 && posSize > 0 && maxLossPct > 0;
-      console.log('Has minimum inputs:', hasMinimumInputs);
+      const hasMinimumInputs = entryMC > 0 && targetMC > 0 && posSize > 0;
       
       if (!hasMinimumInputs) {
         // Hide results card if insufficient inputs
-        console.log('Hiding results card - insufficient inputs');
         resultsCard.classList.remove('visible');
         evAmount.textContent = '$0';
         evLabel.textContent = 'Enter values above';
@@ -856,7 +851,6 @@
       }
       
       // Show results card when we have minimum inputs
-      console.log('Showing results card');
       resultsCard.classList.add('visible');
 
       // Calculate multiples
@@ -959,60 +953,9 @@
     // Track previous EV for crossing detection
     let previousEV = 0;
 
-    // Update confidence display with haptic-like feedback
+    // Update confidence display
     confidence.addEventListener('input', (e) => {
-      console.log('Confidence slider moved to:', e.target.value);
-      const value = e.target.value;
-      confidenceDisplay.textContent = value + '%';
-      
-      // Scale the display slightly on change
-      confidenceDisplay.style.transform = 'scale(1.1)';
-      setTimeout(() => {
-        confidenceDisplay.style.transform = 'scale(1)';
-      }, 100);
-      
-      // Calculate new EV to detect crossing
-      const entryMC = parseShorthand(entry.value);
-      const targetMC = parseShorthand(target.value);
-      const posSize = parseShorthand(position.value);
-      const maxLossPct = parseFloat(maxLoss.value) || 25;
-      const slippagePct = Math.min(50, Math.max(0, parseFloat(slippage.value) || 0)) / 100;
-      const conf = parseFloat(value) / 100;
-      
-      if (entryMC > 0 && targetMC > 0 && posSize > 0) {
-        const multiple = targetMC / entryMC;
-        const upsideRaw = posSize * Math.max(0, multiple - 1);
-        const upsideAmount = upsideRaw * (1 - slippagePct);
-        const downsideAmount = posSize * Math.min(1, maxLossPct / 100);
-        const ev = (conf * upsideAmount) - ((1 - conf) * downsideAmount);
-        
-        // Vibrate when crossing verdict boundaries
-        if ('vibrate' in navigator) {
-          // Calculate EV percentage for borderline detection
-          const evPct = posSize > 0 ? Math.abs(ev / posSize) : 0;
-          const prevEvPct = posSize > 0 ? Math.abs(previousEV / posSize) : 0;
-          
-          // Determine verdict states
-          const getVerdictState = (ev, R, evPct) => {
-            if (ev > 0 && R >= 2) return 'allowed';
-            if (evPct <= 0.01 || (R >= 1.5 && R < 2)) return 'borderline';
-            return 'fold';
-          };
-          
-          const currentState = getVerdictState(ev, upsideAmount/downsideAmount, evPct);
-          const prevState = getVerdictState(previousEV, upsideAmount/downsideAmount, prevEvPct);
-          
-          if (currentState !== prevState) {
-            navigator.vibrate(20);
-          } else if (value == 10 || value == 20 || value == 30) {
-            navigator.vibrate(10);
-          }
-        }
-        
-        previousEV = ev;
-      }
-      
-      calculate();
+      confidenceDisplay.textContent = e.target.value + '%';
     });
     
     // Details toggle functionality
@@ -1022,76 +965,12 @@
       detailsToggle.textContent = isExpanded ? 'Why?' : 'Hide';
     });
 
-    // Handle market cap inputs with smart formatting
-    function handleMarketCapInput(input, previewId) {
-      let lastValue = input.value;
-      const preview = $(previewId);
-      
-      input.addEventListener('input', (e) => {
-        let value = input.value;
-        
-        // Allow typing numbers, commas, dots, and K/M/B
-        if (!/^[\d,\.KkMmBb]*$/.test(value)) {
-          input.value = lastValue;
-          return;
-        }
-        
-        lastValue = value;
-        
-        // Show preview if shorthand is used
-        if (/[KkMmBb]/.test(value)) {
-          const num = parseShorthand(value);
-          if (num > 0) {
-            preview.textContent = '= $' + formatWithCommas(Math.round(num));
-          } else {
-            preview.textContent = '';
-          }
-        } else if (value && !isNaN(parseFloat(value))) {
-          // Show formatted version for raw numbers
-          const num = parseFloat(value);
-          if (num >= 1000) {
-            preview.textContent = '= ' + formatWithCommas(Math.round(num));
-          } else {
-            preview.textContent = '';
-          }
-        } else {
-          preview.textContent = '';
-        }
-        
-        // Calculate after brief delay
-        clearTimeout(calculateTimeout);
-        calculateTimeout = setTimeout(calculate, 120);
-      });
-      
-      // Format on blur for cleaner display
-      input.addEventListener('blur', () => {
-        const num = parseShorthand(input.value);
-        if (num > 0) {
-          // Keep shorthand if they typed it, otherwise show with commas
-          if (!/[KkMmBb]/.test(input.value)) {
-            input.value = formatWithCommas(Math.round(num));
-          }
-        }
-        // Clear preview on blur
-        preview.textContent = '';
-      });
-      
-      // Select all on focus for quick replacement
+    // Add select-all behavior to text inputs
+    [entry, target, position].forEach(input => {
       input.addEventListener('focus', () => {
-        const num = parseShorthand(input.value);
-        if (num > 0 && !/[KkMmBb]/.test(input.value)) {
-          // If it's just a number with commas, remove commas for editing
-          input.value = input.value.replace(/,/g, '');
-        }
-        // Select all text for easy replacement
         setTimeout(() => input.select(), 0);
       });
-    }
-    
-    // Apply smart formatting to market cap and position inputs
-    handleMarketCapInput(entry, 'entry-preview');
-    handleMarketCapInput(target, 'target-preview');
-    handleMarketCapInput(position, 'position-preview');
+    });
     
     // Add select-all on focus for remaining inputs
     [maxLoss, slippage].forEach(input => {
@@ -1100,13 +979,9 @@
       });
     });
     
-    // Calculate on position, maxLoss and slippage inputs
-    let calculateTimeout;
-    [position, maxLoss, slippage].forEach(input => {
-      input.addEventListener('input', () => {
-        clearTimeout(calculateTimeout);
-        calculateTimeout = setTimeout(calculate, 120);
-      });
+    // Calculate on all inputs
+    [entry, target, position, maxLoss, slippage, confidence].forEach(input => {
+      input.addEventListener('input', calculate);
     });
     
     // Add multiplier chip functionality
@@ -1184,16 +1059,6 @@
     // Button actions
 
 
-    // Debug: Check if all elements exist
-    console.log('Elements check:');
-    console.log('entry:', entry);
-    console.log('target:', target);
-    console.log('position:', position);
-    console.log('maxLoss:', maxLoss);
-    console.log('confidence:', confidence);
-    console.log('resultsCard:', resultsCard);
-    console.log('evAmount:', evAmount);
-    
     // Initialize
     loadLastValues();
     calculate();
